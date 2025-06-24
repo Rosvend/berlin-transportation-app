@@ -1,68 +1,45 @@
 # 📦 Product Requirements Document (PRD) – Real-Time Public Transport Data Pipeline
 
-## Real-Time Berlin Transport Data Pipeline using BVG API + Snowflake + DBT + Airflow
+## 📝 Introduction
+
+This document outlines the product requirements for building a **real-time data pipeline** designed to ingest, process, and analyze **live public transport data** from Berlin's BVG system. The objective is to create a **production-grade, modular, and cloud-portable solution** suitable for a professional **data engineering portfolio**. The system will offer insights into transport efficiency and potential delays.
 
 ---
 
-## Purpose
+## 🎯 Functional Requirements
 
-The purpose of this project is to build a modern, production-grade real-time data pipeline that extracts, stores, transforms, and visualizes live public transport data from Berlin’s BVG system using the [v6.bvg.transport.rest](https://v6.bvg.transport.rest) API. The pipeline is designed to be modular, cloud-portable (AWS-ready), and suitable for a data engineering portfolio.
-
----
-
-## Scope
-
-This project covers the **end-to-end lifecycle** of a real-time data pipeline:
-- API data extraction
-- Ingestion into a raw zone
-- Loading into Snowflake
-- Transformation with dbt
-- DAG orchestration with Airflow
-- Dashboard visualization
-- CI/CD and automated data quality testing
+| Requirement ID | Description | User Story | Expected Behavior/Outcome |
+|----------------|-------------|------------|----------------------------|
+| **FR001** | Data Ingestion | As a data engineer, I want to reliably extract live departure data from the BVG API to serve as the foundation for the pipeline. | The system must pull data from the `/stops/:id/departures` endpoint every 5 minutes. Raw data must be saved as timestamped JSON files in a raw storage zone (e.g., MinIO/S3), orchestrated by an Airflow DAG. |
+| **FR002** | Data Storage (Snowflake) | As a data engineer, I want to load the raw, unprocessed data into Snowflake to ensure a persistent, raw copy is available for reprocessing. | Raw JSON files should be loaded into a `RAW.departures_raw` table in Snowflake using VARIANT types. |
+| **FR003** | Data Transformation (dbt) | As a data modeler, I want to clean, structure, and aggregate the raw data to make it suitable for analysis. | Using dbt, create staging models (`STAGING.departures_clean`) and analytical marts (`MARTS.delays_by_stop`, `MARTS.busyness_per_hour`). |
+| **FR004** | dbt Testing & Documentation | As a data modeler, I want to ensure the quality and integrity of my transformations and document them clearly. | Implement dbt tests (uniqueness, not-null, referential integrity). Generate comprehensive documentation using `dbt docs`. |
+| **FR005** | Dashboard Visualization | As a data analyst, I want to visualize key transport performance indicators to identify trends and anomalies. | Build a Streamlit dashboard showing average delays per line/stop, congestion trends, and top delayed stations. |
+| **FR006** | CI/CD Automation | As a developer, I want to automate testing and deployment to ensure code quality and a streamlined release process. | Use GitHub Actions to run `pytest` and `dbt test` on every push to main. Successful runs trigger DAG and dbt model deployment. |
+| **FR007** | Data Quality Checks | As a data engineer, I want to validate incoming data to prevent low-quality data from corrupting the pipeline. | Use Great Expectations for row count, null checks, and type validation. Integrated into Airflow to halt execution on failure. |
 
 ---
 
-## Tech Stack
+## 🔒 Non-Functional Requirements
 
-| Layer             | Technology (Local)              | Cloud Equivalent (AWS)             |
-|------------------|----------------------------------|------------------------------------|
-| Ingestion         | Python + Airflow (Docker)        | MWAA / ECS / EKS                   |
-| Storage           | MinIO or local filesystem        | Amazon S3                          |
-| Warehouse         | Snowflake (Free Trial)           | Snowflake (Cloud)                  |
-| Transformation    | dbt + Snowflake SQL              | dbt Cloud + Snowflake              |
-| Orchestration     | Airflow (Docker Compose)         | MWAA / Airflow on ECS              |
-| Stream (Optional) | Kafka + PySpark (simulated)      | MSK or Kinesis + Glue / EMR        |
-| Visualization     | Streamlit or Jupyter             | EC2, Fargate, S3 + CloudFront      |
-| CI/CD             | GitHub Actions                   | GitHub Actions / CodePipeline      |
-| Data Quality      | Great Expectations + Pytest      | Same (CI/CD + S3, Snowflake)       |
+| Requirement ID | Description | User Story | Expected Behavior/Outcome |
+|----------------|-------------|------------|----------------------------|
+| **NFR001** | Performance & Latency | As a user, I want the data to be fresh and dashboards to be responsive so I can make timely decisions. | End-to-end latency (API to mart) ≤ 15 minutes. Dashboard load time ≤ 5 seconds. |
+| **NFR002** | Scalability | As a data engineer, I want the system to handle growing data volumes without performance degradation. | Must scale from one stop ID to the full BVG network. Compute should be configurable. |
+| **NFR003** | Reliability & Resilience | As a data engineer, I want the pipeline to be robust against transient failures and easy to monitor. | Airflow tasks should have retry logic. Logging and alerting must be included for failures or anomalies. |
+| **NFR004** | Security | As a security admin, I want all sensitive credentials and data to be protected against unauthorized access. | API keys and credentials managed via secrets manager or environment variables. All data encrypted in transit and at rest. |
+| **NFR005** | Maintainability & Extensibility | As a developer, I want the project to be well-documented and modular so I can easily fix bugs or add new features. | Modular ETL codebase, inline comments, detailed `README.md`, and parameterized config files. |
+| **NFR006** | Observability | As a data engineer, I want to have clear visibility into the pipeline's health and performance. | Implement structured logging and track metrics: DAG run time, load volume, dbt model execution time. |
 
 ---
 
-## 🗂️ Repo Structure
+## 🛣️ Phased Roadmap
 
-```bash
-berlin-transport-pipeline/
-├── dags/                      # Airflow DAGs
-│   └── ingest_departures.py
-├── extract/                   # API data fetch logic
-│   └── departures.py
-├── transform/                 # dbt project lives here
-│   └── dbt_project/
-├── config/                    # Configuration files
-│   └── config.yaml
-├── scripts/                   # Manual tests, utilities
-│   └── test_connection.py
-├── tests/                     # Pytest unit + integration tests
-├── notebooks/                 # Exploration notebooks (optional)
-├── dashboard/                 # Streamlit dashboards
-│   └── delays_dashboard.py
-├── data/                      # Local raw storage (MinIO mount)
-│   ├── raw/
-│   ├── staging/
-│   └── processed/
-├── docker-compose.yml         # Orchestration of local stack
-├── requirements.txt
-├── .env                       # Secrets + credentials
-├── README.md
-├── .gitignore
+| Phase ID | Phase Name | Timeline | Key Deliverables |
+|----------|------------|----------|------------------|
+| **P1** | Setup & Infrastructure | Weeks 1–2 | GitHub repo initialized, Docker environment for Airflow & MinIO, basic CI/CD for linting. |
+| **P2** | Ingestion Pipeline | Weeks 3–4 | Python ingestion logic; Airflow DAG for data extraction and MinIO storage. |
+| **P3** | Snowflake Integration | Weeks 4–5 | Snowflake setup; raw data loading DAG; `RAW.departures_raw` table populated. |
+| **P4** | dbt Transformation | Weeks 5–6 | dbt project with staging/mart models; tests passing; dbt docs generated. |
+| **P5** | Dashboarding | Weeks 7–8 | Streamlit dashboard connected to Snowflake; visualizations built and validated. |
+| **P6** | Finalization & Automation | Weeks 8–9 | CI/CD completed; Great Expectations added; documentation and final polish. |
