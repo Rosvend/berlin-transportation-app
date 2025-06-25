@@ -47,3 +47,6 @@ ENV AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=True
 
 # Expose port
 EXPOSE 8080
+COPY --chown=airflow:root docker/init-airflow.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]

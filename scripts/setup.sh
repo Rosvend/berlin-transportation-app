@@ -62,7 +62,7 @@ create_directories() {
         "data/raw"
         "data/staging"
         "data/mart"
-        "airflow/docker"
+        "docker"
         "dbt/models/staging"
         "dbt/models/marts"
         "logs"

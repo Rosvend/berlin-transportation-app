@@ -39,7 +39,7 @@ setup:
 # Start all services
 up:
 	@echo "Starting all services..."
-	docker-compose up -d
+	docker-compose up --build -d
 	@echo "✅ Services started. Access:"
 	@echo "   - Airflow UI: http://localhost:8080 (admin/admin)"
 	@echo "   - MinIO Console: http://localhost:9001 (minioadmin/minioadmin123)"
@@ -99,12 +99,12 @@ init-airflow:
 
 # Create MinIO buckets
 create-buckets:
-    @echo "Creating MinIO buckets..."
-    @docker-compose exec airflow-webserver python /opt/airflow/scripts/setup_minio.py
+	@echo "Creating MinIO buckets..."
+	@docker-compose exec airflow-webserver python /opt/airflow/scripts/setup_minio.py
 
 # Create MinIO buckets
 create-directories:
-    @echo "Creating project directories..."
+	@echo "Creating project directories..."
 	@mkdir -p airflow/dags airflow/docker
 	@mkdir -p extract tests notebooks dashboards
 	@mkdir -p data/raw data/staging data/mart
