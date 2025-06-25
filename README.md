@@ -41,26 +41,161 @@ This project covers the **end-to-end lifecycle** of a real-time data pipeline:
 
 ```bash
 berlin-transport-pipeline/
-├── dags/                      # Airflow DAGs
-│   └── ingest_departures.py
-├── extract/                   # API data fetch logic
-│   └── departures.py
-├── transform/                 # dbt project lives here
-│   └── dbt_project/
-├── config/                    # Configuration files
+├── airflow/                  # Airflow DAGs and configurations
+│   ├── dags/
+│   │   ├── __init__.py
+│   │   └── ingest_departure.py
+│   └── .gitkeep
+├── config/                   # Configuration files
 │   └── config.yaml
-├── scripts/                   # Manual tests, utilities
-│   └── test_connection.py
-├── tests/                     # Pytest unit + integration tests
-├── notebooks/                 # Exploration notebooks (optional)
-├── dashboard/                 # Streamlit dashboards
-│   └── delays_dashboard.py
-├── data/                      # Local raw storage (MinIO mount)
+├── dashboards/               # Streamlit dashboards
+│   ├── __init__.py
+│   └── app.py
+├── data/                     # Local raw storage (MinIO mount)
+│   ├── mart/
 │   ├── raw/
-│   ├── staging/
-│   └── processed/
-├── docker-compose.yml         # Orchestration of local stack
+│   └── staging/
+├── dbt/                      # dbt project
+│   ├── dbt_project.yml
+│   ├── profiles.yml
+│   └── models/
+│       ├── marts/
+│       └── staging/
+├── docker/                   # Dockerfiles and initialization scripts
+│   ├── dockerfile.airflow
+│   ├── dockerfile.streamlit
+│   └── init-airflow.sh
+├── extract/                  # API data fetch logic
+│   ├── __init__.py
+│   ├── departures.py
+│   └── utils.py
+├── logs/                     # Logs directory
+├── notebooks/                # Exploration notebooks
+│   └── EDA.ipynb
+├── scripts/                  # Manual tests, utilities
+│   ├── bucket_creation.sh
+│   └── setup.sh
+├── tests/                    # Pytest unit + integration tests
+│   ├── __init__.py
+│   └── test_departures.py
+├── transform/                # Transformation logic
+├── docker-compose.yml        # Orchestration of local stack
+├── makefile                  # Makefile for convenience commands
+├── requirements-streamlit.txt
 ├── requirements.txt
-├── .env                       # Secrets + credentials
-├── README.md
-├── .gitignore
+├── .env                      # Secrets + credentials
+├── README.md                 # Project documentation
+├── .gitignore                # Git ignore file
+```
+
+---
+
+## How to Run
+
+### Prerequisites
+
+1. **Install Docker and Docker Compose**:
+   - [Docker Installation Guide](https://docs.docker.com/get-docker/)
+   - [Docker Compose Installation Guide](https://docs.docker.com/compose/install/)
+
+2. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/your-repo/berlin-transport-pipeline.git
+   cd berlin-transport-pipeline
+   ```
+
+3. **Set Up Environment Variables**:
+   - Copy `.env.template` to `.env`:
+     ```bash
+     cp .env.template .env
+     ```
+   - Update `.env` with your credentials (e.g., Snowflake, MinIO).
+
+4. **Generate Fernet Key for Airflow**:
+   ```bash
+   python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+   ```
+   - Replace `AIRFLOW__CORE__FERNET_KEY` in `.env` with the generated key.
+
+### Steps to Run
+
+1. **Build and Start Services**:
+   ```bash
+   make up
+   ```
+
+2. **Initialize Airflow**:
+   ```bash
+   make init-airflow
+   ```
+
+3. **Create MinIO Buckets**:
+   ```bash
+   make create-buckets
+   ```
+
+4. **Access Services**:
+   - **Airflow UI**: [http://localhost:8080](http://localhost:8080) (admin/admin)
+   - **MinIO Console**: [http://localhost:9001](http://localhost:9001) (minioadmin/minioadmin123)
+   - **Streamlit Dashboard**: [http://localhost:8501](http://localhost:8501)
+
+### Useful Commands
+
+- **Stop Services**:
+  ```bash
+  make down
+  ```
+
+- **View Logs**:
+  ```bash
+  make logs
+  ```
+
+- **Clean Up Containers and Volumes**:
+  ```bash
+  make clean
+  ```
+
+- **Check Service Health**:
+  ```bash
+  make health
+  ```
+
+---
+
+## Next Steps
+
+1. **Run Airflow DAGs**:
+   - Navigate to the Airflow UI and trigger the DAGs.
+
+2. **Explore Data**:
+   - Use the Streamlit dashboard to visualize transport data.
+
+3. **Extend the Pipeline**:
+   - Add new DAGs, dbt models, or dashboards as needed.
+
+---
+
+## Troubleshooting
+
+- **Airflow UI Not Accessible**:
+  - Ensure the containers are running:
+    ```bash
+    docker-compose ps
+    ```
+  - Rebuild and restart services:
+    ```bash
+    make up
+    ```
+
+- **MinIO Buckets Not Created**:
+  - Run the bucket creation script:
+    ```bash
+    make create-buckets
+    ```
+
+- **Streamlit Dashboard Not Loading**:
+  - Check the logs:
+    ```bash
+    make logs
+    ```
