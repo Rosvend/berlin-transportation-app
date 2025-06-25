@@ -144,8 +144,8 @@ _create-buckets-silent:
 # Private target for silent health checks
 _health-check-silent:
 ifeq ($(OS),Windows_NT)
-	@powershell -Command "try { Invoke-WebRequest -Uri http://localhost:8080/health -UseBasicParsing -TimeoutSec 30 -ErrorAction Stop } catch { Write-Host 'Airflow health check timeout' }"
-	@powershell -Command "try { Invoke-WebRequest -Uri http://localhost:9000/minio/health/live -UseBasicParsing -TimeoutSec 30 -ErrorAction Stop } catch { Write-Host 'MinIO health check timeout' }"
+	@powershell -Command "try { $$response = Invoke-WebRequest -Uri http://localhost:8080/health -UseBasicParsing -TimeoutSec 30 -ErrorAction Stop; if ($$response.StatusCode -eq 200) { Write-Host 'Airflow: Healthy' } else { Write-Host 'Airflow: Unhealthy' } } catch { Write-Host 'Airflow: Timeout or Error' }"
+	@powershell -Command "try { $$response = Invoke-WebRequest -Uri http://localhost:9000/minio/health/live -UseBasicParsing -TimeoutSec 30 -ErrorAction Stop; if ($$response.StatusCode -eq 200) { Write-Host 'MinIO: Healthy' } else { Write-Host 'MinIO: Unhealthy' } } catch { Write-Host 'MinIO: Timeout or Error' }"
 else
 	@timeout 30 bash -c 'until curl -f http://localhost:8080/health > /dev/null 2>&1; do sleep 2; done' || echo "⚠️  Airflow health check timeout"
 	@timeout 30 bash -c 'until curl -f http://localhost:9000/minio/health/live > /dev/null 2>&1; do sleep 2; done' || echo "⚠️  MinIO health check timeout"

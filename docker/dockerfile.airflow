@@ -35,6 +35,7 @@ COPY --chown=airflow:root airflow/dags/ /opt/airflow/dags/
 COPY --chown=airflow:root extract/ /opt/airflow/extract/
 COPY --chown=airflow:root config/ /opt/airflow/config/
 COPY --chown=airflow:root dbt/ /opt/airflow/dbt/
+COPY --chown=airflow:root scripts/ /opt/airflow/scripts/
 
 # Initialize the database (this will be run when container starts)
 # But we need to ensure it's done before starting other services

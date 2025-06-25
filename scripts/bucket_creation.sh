@@ -105,4 +105,7 @@ def main():
 
 
 if __name__ == "__main__":
+    # Note: Both scripts exist, but we should ensure the correct one is used
+    # The setup_minio.py (not bucket_creation.sh) is the working one
+    print("Note: Using setup_minio.py for bucket creation")
     main()

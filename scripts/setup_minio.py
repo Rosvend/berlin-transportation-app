@@ -10,6 +10,7 @@ import time
 import yaml
 from minio import Minio
 from minio.error import S3Error
+from io import BytesIO
 
 
 def wait_for_minio(client, max_retries=30, delay=2):
@@ -36,14 +37,20 @@ def create_folder_structure(client, bucket_name, paths):
         try:
             # Create a placeholder object to represent the folder
             placeholder_path = f"{path_value}/.keep"
+            
+            # Convert empty string to bytes and create a BytesIO object
+            data = BytesIO(b"")
+            
             client.put_object(
                 bucket_name, 
                 placeholder_path, 
-                data=b"", 
+                data=data, 
                 length=0
             )
             print(f"✅ Created folder: {path_value}/")
         except S3Error as e:
+            print(f"⚠️  Could not create folder {path_value}/: {e}")
+        except Exception as e:
             print(f"⚠️  Could not create folder {path_value}/: {e}")
 
 
