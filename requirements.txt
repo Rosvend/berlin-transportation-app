@@ -1,11 +1,48 @@
-apache-airflow==2.9.0
-boto3
-snowflake-connector-python
-pydantic
-requests
-python-dotenv
-pytest
-great_expectations
-dbt-core
-dbt-snowflake
-streamlit
+# Core dependencies for Airflow and data pipeline
+apache-airflow[celery,postgres,redis]==2.7.1
+
+# HTTP requests
+requests==2.31.0
+
+# Data manipulation
+pandas==2.0.3
+numpy==1.24.3
+
+# Snowflake connectivity
+snowflake-connector-python==3.2.1
+snowflake-sqlalchemy==1.5.0
+
+# dbt for data transformations
+dbt-core==1.6.0
+dbt-snowflake==1.6.0
+
+# MinIO/S3 connectivity
+minio==7.1.16
+boto3==1.28.17
+
+# Data quality and testing
+great-expectations==0.17.12
+pytest==7.4.0
+pytest-mock==3.11.1
+
+# Configuration management
+pyyaml==6.0.1
+python-dotenv==1.0.0
+
+# Logging and monitoring
+structlog==23.1.0
+
+# JSON handling
+jsonschema==4.19.0
+
+# Database connectivity
+psycopg2-binary==2.9.7
+sqlalchemy==1.4.49
+
+# Date/time handling
+pendulum==2.1.2
+
+# Development tools
+black==23.7.0
+flake8==6.0.0
+pre-commit==3.3.3

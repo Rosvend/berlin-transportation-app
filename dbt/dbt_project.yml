@@ -1,0 +1,60 @@
+name: 'bvg_transport'
+version: '1.0.0'
+config-version: 2
+
+# This setting configures which "profile" dbt uses for this project.
+profile: 'bvg_transport'
+
+# These configurations specify where dbt should look for different types of files.
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Configuring models
+models:
+  bvg_transport:
+    # Staging models - these are our cleaned raw data
+    staging:
+      +materialized: view
+      +schema: staging
+      
+    # Marts models - these are our business logic models
+    marts:
+      +materialized: table
+      +schema: marts
+      
+      # Core business entities
+      core:
+        +materialized: table
+        
+      # Metrics and aggregations
+      metrics:
+        +materialized: table
+
+# Seeds configuration
+seeds:
+  bvg_transport:
+    +schema: seeds
+
+# Snapshots configuration
+snapshots:
+  bvg_transport:
+    +target_schema: snapshots
+
+# Variables
+vars:
+  # dbt project variables
+  start_date: '2024-01-01'
+  end_date: '2024-12-31'
+  
+  # Data quality thresholds
+  max_delay_minutes: 30
+  min_service_frequency: 5
