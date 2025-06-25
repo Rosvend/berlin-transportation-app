@@ -51,18 +51,20 @@ create_directories() {
     print_info "Creating directory structure..."
     
     directories=(
-        "dags"
+        "airflow/dags"
         "extract"
         "transform"
         "config"
         "scripts"
         "tests"
         "notebooks"
-        "dashboard"
+        "dashboards"
         "data/raw"
         "data/staging"
-        "data/processed"
-        "docker"
+        "data/mart"
+        "airflow/docker"
+        "dbt/models/staging"
+        "dbt/models/marts"
         "logs"
         ".github/workflows"
     )
@@ -109,9 +111,9 @@ create_placeholder_files() {
     print_info "Creating placeholder files..."
     
     # Create a simple DAG placeholder
-    if [ ! -f dags/__init__.py ]; then
-        touch dags/__init__.py
-        print_status "Created dags/__init__.py"
+    if [ ! -f airflow/dags/__init__.py ]; then
+        touch airflow/dags/__init__.py
+        print_status "Created airflow/dags/__init__.py"
     fi
     
     # Create extract module placeholder
@@ -126,10 +128,21 @@ create_placeholder_files() {
         print_status "Created tests/__init__.py"
     fi
     
-    # Create dashboard placeholder
-    if [ ! -f dashboard/__init__.py ]; then
-        touch dashboard/__init__.py
-        print_status "Created dashboard/__init__.py"
+    # Create dashboards placeholder
+    if [ ! -f dashboards/__init__.py ]; then
+        touch dashboards/__init__.py
+        print_status "Created dashboards/__init__.py"
+    fi
+    
+    # Create dbt placeholder files (if they don't exist)
+    if [ ! -f dbt/dbt_project.yml ]; then
+        touch dbt/dbt_project.yml
+        print_status "Created dbt/dbt_project.yml"
+    fi
+    
+    if [ ! -f dbt/profiles.yml ]; then
+        touch dbt/profiles.yml
+        print_status "Created dbt/profiles.yml"
     fi
 }
 
