@@ -184,6 +184,32 @@ validate_setup() {
     print_status "All required files present"
 }
 
+# Add to setup.sh
+validate_env() {
+    print_info "Validating environment variables..."
+    
+    required_vars=(
+        "SNOWFLAKE_ACCOUNT"
+        "SNOWFLAKE_USER" 
+        "SNOWFLAKE_PASSWORD"
+        "MINIO_ACCESS_KEY"
+        "MINIO_SECRET_KEY"
+    )
+    
+    missing_vars=()
+    for var in "${required_vars[@]}"; do
+        if [ -z "${!var}" ]; then
+            missing_vars+=("$var")
+        fi
+    done
+    
+    if [ ${#missing_vars[@]} -ne 0 ]; then
+        print_error "Missing required environment variables:"
+        printf '%s\n' "${missing_vars[@]}"
+        exit 1
+    fi
+}
+
 # Main setup function
 main() {
     echo -e "${BLUE}"
