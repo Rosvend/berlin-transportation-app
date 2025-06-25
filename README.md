@@ -90,51 +90,38 @@ berlin-transport-pipeline/
 
 ---
 
-## How to Run
-
 ### Prerequisites
 
-1. **Install Docker and Docker Compose**:
-   - [Docker Installation Guide](https://docs.docker.com/get-docker/)
-   - [Docker Compose Installation Guide](https://docs.docker.com/compose/install/)
+**Install Docker and Docker Compose**:
+- [Docker Installation Guide](https://docs.docker.com/get-docker/)
+- [Docker Compose Installation Guide](https://docs.docker.com/compose/install/)
 
-2. **Clone the Repository**:
+## How to Run in 5 simple steps
+
+1. **Clone the Repository**:
    ```bash
    git clone https://github.com/your-repo/berlin-transport-pipeline.git
    cd berlin-transport-pipeline
    ```
 
-3. **Set Up Environment Variables**:
+2. **Set Up Environment Variables**:
    - Copy `.env.template` to `.env`:
      ```bash
      cp .env.template .env
      ```
    - Update `.env` with your credentials (e.g., Snowflake, MinIO).
 
-4. **Generate Fernet Key for Airflow**:
+3. **Run setup script**:
    ```bash
-   python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+     bash scripts/setup.sh
    ```
-   - Replace `AIRFLOW__CORE__FERNET_KEY` in `.env` with the generated key.
 
-### Steps to Run
-
-1. **Build and Start Services**:
+4. **Build and Start Services**:
    ```bash
    make up
    ```
 
-2. **Initialize Airflow**:
-   ```bash
-   make init-airflow
-   ```
-
-3. **Create MinIO Buckets**:
-   ```bash
-   make create-buckets
-   ```
-
-4. **Access Services**:
+5. **Access Services**:
    - **Airflow UI**: [http://localhost:8080](http://localhost:8080) (admin/admin)
    - **MinIO Console**: [http://localhost:9001](http://localhost:9001) (minioadmin/minioadmin123)
    - **Streamlit Dashboard**: [http://localhost:8501](http://localhost:8501)
