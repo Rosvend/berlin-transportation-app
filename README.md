@@ -100,8 +100,8 @@ berlin-transport-pipeline/
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/your-repo/berlin-transport-pipeline.git
-   cd berlin-transport-pipeline
+   git clone https://github.com/rosvend/berlin-transport-elt-snowflake.git
+   cd berlin-transport-elt-snowflake
    ```
 
 2. **Set Up Environment Variables**:
