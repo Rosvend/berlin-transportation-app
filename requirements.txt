@@ -8,14 +8,6 @@ requests==2.31.0
 pandas==2.0.3
 numpy==1.24.3
 
-# Snowflake connectivity
-snowflake-connector-python==3.2.1
-snowflake-sqlalchemy==1.5.0
-
-# dbt for data transformations
-dbt-core==1.6.0
-dbt-snowflake==1.6.0
-
 # MinIO/S3 connectivity
 minio==7.1.16
 boto3==1.28.17
@@ -24,6 +16,7 @@ boto3==1.28.17
 great-expectations==0.17.12
 pytest==7.4.0
 pytest-mock==3.11.1
+pydantic ==2.11.9
 
 # Configuration management
 pyyaml==6.0.1
