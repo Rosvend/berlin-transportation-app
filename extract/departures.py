@@ -68,13 +68,11 @@ def get_radar(north, south, west, east, duration, frames, results=1, polylines=T
 def display_vehicle_info(radar_data):
     print("\n🔍 Radar Data Analysis:\n")
     
-    # Debug: Check the actual structure
     print(f"Data type: {type(radar_data)}")
     
     if isinstance(radar_data, dict):
         print("Response is a dictionary with keys:", list(radar_data.keys()))
         
-        # Check if there's a 'movements' or similar key
         if 'movements' in radar_data:
             movements = radar_data['movements']
         elif 'vehicles' in radar_data:
