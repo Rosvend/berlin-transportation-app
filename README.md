@@ -48,30 +48,15 @@ berlin-transport-pipeline/
 │   └── .gitkeep
 ├── config/                   # Configuration files
 │   └── config.yaml
-├── dashboards/               # Streamlit dashboards
-│   ├── __init__.py
-│   └── app.py
-├── data/                     # Local raw storage (MinIO mount)
-│   ├── mart/
-│   ├── raw/
-│   └── staging/
-├── dbt/                      # dbt project
-│   ├── dbt_project.yml
-│   ├── profiles.yml
-│   └── models/
-│       ├── marts/
-│       └── staging/
 ├── docker/                   # Dockerfiles and initialization scripts
 │   ├── dockerfile.airflow
-│   ├── dockerfile.streamlit
 │   └── init-airflow.sh
-├── extract/                  # API data fetch logic
+├── etl/
+│   ├── extract/
+│   │   ├── __init__.py           # API data fetch logic
 │   ├── __init__.py
 │   ├── departures.py
 │   └── utils.py
-├── logs/                     # Logs directory
-├── notebooks/                # Exploration notebooks
-│   └── EDA.ipynb
 ├── scripts/                  # Manual tests, utilities
 │   ├── bucket_creation.sh
 │   └── setup.sh
