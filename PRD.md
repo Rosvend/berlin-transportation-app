@@ -1,12 +1,12 @@
-# 📦 Product Requirements Document (PRD) – Real-Time Public Transport Data Pipeline
+# Product Requirements Document (PRD) – Real-Time Public Transport Data Pipeline
 
-## 📝 Introduction
+## Introduction
 
 This document outlines the product requirements for building a **real-time data pipeline** designed to ingest, process, and analyze **live public transport data** from Berlin's BVG system. The objective is to create a **production-grade, modular, and cloud-portable solution** suitable for a professional **data engineering portfolio**. The system will offer insights into transport efficiency and potential delays.
 
 ---
 
-## 🎯 Functional Requirements
+## Functional Requirements
 
 | Requirement ID | Description | User Story | Expected Behavior/Outcome |
 |----------------|-------------|------------|----------------------------|
@@ -32,14 +32,3 @@ This document outlines the product requirements for building a **real-time data 
 | **NFR006** | Observability | As a data engineer, I want to have clear visibility into the pipeline's health and performance. | Implement structured logging and track metrics: DAG run time, load volume, dbt model execution time. |
 
 ---
-
-## 🛣️ Phased Roadmap
-
-| Phase ID | Phase Name | Timeline | Key Deliverables |
-|----------|------------|----------|------------------|
-| **P1** | Setup & Infrastructure | Weeks 1–2 | GitHub repo initialized, Docker environment for Airflow & MinIO, basic CI/CD for linting. |
-| **P2** | Ingestion Pipeline | Weeks 3–4 | Python ingestion logic; Airflow DAG for data extraction and MinIO storage. |
-| **P3** | Snowflake Integration | Weeks 4–5 | Snowflake setup; raw data loading DAG; `RAW.departures_raw` table populated. |
-| **P4** | dbt Transformation | Weeks 5–6 | dbt project with staging/mart models; tests passing; dbt docs generated. |
-| **P5** | Dashboarding | Weeks 7–8 | Streamlit dashboard connected to Snowflake; visualizations built and validated. |
-| **P6** | Finalization & Automation | Weeks 8–9 | CI/CD completed; Great Expectations added; documentation and final polish. |
