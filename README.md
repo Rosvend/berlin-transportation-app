@@ -21,23 +21,40 @@ This project covers the **end-to-end lifecycle** of a real-time data pipeline:
 
 ---
 
-## Tech Stack
+## Tech stack
 
-| Layer             | Technology (Local)              | Cloud Equivalent (AWS)             |
-|------------------|----------------------------------|------------------------------------|
-| Ingestion         | Python + Airflow (Docker)        | MWAA / ECS / EKS                   |
-| Storage           | MinIO or local filesystem        | Amazon S3                          |
-| Warehouse         | Snowflake (Free Trial)           | Snowflake (Cloud)                  |
-| Transformation    | dbt + Snowflake SQL              | dbt Cloud + Snowflake              |
-| Orchestration     | Airflow (Docker Compose)         | MWAA / Airflow on ECS              |
-| Stream (Optional) | Kafka + PySpark (simulated)      | MSK or Kinesis + Glue / EMR        |
-| Visualization     | Streamlit or Jupyter             | EC2, Fargate, S3 + CloudFront      |
-| CI/CD             | GitHub Actions                   | GitHub Actions / CodePipeline      |
-| Data Quality      | Great Expectations + Pytest      | Same (CI/CD + S3, Snowflake)       |
+- **Backend Framework**: FastAPI 0.104
+- **Python Version**: 3.12
+- **HTTP Client**: httpx (async)
+- **Caching**: Redis 7
+- **Data Validation**: Pydantic 2.0
+- **Template Engine**: Jinja2
+- **Frontend**: Vanilla JS + Leaflet
+- **Container**: Docker + Docker Compose
+- **Package Manager**: UV / pip
+- **Testing**: pytest + pytest-asyncio
 
+
+### Layered Architecture
+
+```
+┌─────────────────────────────────┐
+│     Presentation Layer          │
+│  (Templates, Static Files, API) │
+├─────────────────────────────────┤
+│     Application Layer           │
+│    (API Routes, Controllers)    │
+├─────────────────────────────────┤
+│     Business Logic Layer        │
+│  (Services: BVG Client, Cache)  │
+├─────────────────────────────────┤
+│     Data Access Layer           │
+│   (Models, External APIs)       │
+└─────────────────────────────────┘
+```
 ---
 
-## 🗂️ Repo Structure
+## Repo Structure
 
 ```bash
 berlin-transport-pipeline/
@@ -73,101 +90,70 @@ berlin-transport-pipeline/
 ├── .gitignore                # Git ignore file
 ```
 
----
+## How to run
 
-### Prerequisites
+### For Windows
 
-**Install Docker and Docker Compose**:
-- [Docker Installation Guide](https://docs.docker.com/get-docker/)
-- [Docker Compose Installation Guide](https://docs.docker.com/compose/install/)
+### Option 1: Using the Startup Script (Recommended)
 
-## How to Run in 5 simple steps
+```bash
+# Make sure you're in the project root
+cd berlin-transportation-app
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/rosvend/berlin-transport-elt-snowflake.git
-   cd berlin-transport-elt-snowflake
-   ```
+# Run the dev startup script
+./start-dev.sh
+```
 
-2. **Set Up Environment Variables**:
-   - Copy `.env.template` to `.env`:
-     ```bash
-     cp .env.template .env
-     ```
-   - Update `.env` with your credentials (e.g., Snowflake, MinIO).
+This will:
+- Check/create `.env` file
+- Start Redis if needed
+- Install dependencies
+- Launch the FastAPI application
 
-3. **Run setup script**:
-   ```bash
-     bash scripts/setup.sh
-   ```
+### Option 2: Using Docker Compose
 
-4. **Build and Start Services**:
-   ```bash
-   make up
-   ```
+```bash
+# Start backend and Redis
+docker-compose up -d backend redis
 
-5. **Access Services**:
-   - **Airflow UI**: [http://localhost:8080](http://localhost:8080) (admin/admin)
-   - **MinIO Console**: [http://localhost:9001](http://localhost:9001) (minioadmin/minioadmin123)
-   - **Streamlit Dashboard**: [http://localhost:8501](http://localhost:8501)
+# View logs
+docker-compose logs -f backend
 
-### Useful Commands
+# Stop services
+docker-compose down
+```
 
-- **Stop Services**:
-  ```bash
-  make down
-  ```
+### Option 3: Manual Setup
 
-- **View Logs**:
-  ```bash
-  make logs
-  ```
+```bash
+# 1. Create .env file
+cp .env.example .env
 
-- **Clean Up Containers and Volumes**:
-  ```bash
-  make clean
-  ```
+# 2. Start Redis
+docker-compose up -d redis
+# OR use local Redis:
+# redis-server
 
-- **Check Service Health**:
-  ```bash
-  make health
-  ```
+# 3. Install dependencies
+pip install -r pyproject.toml
 
----
+# 4. Run application
+cd backend
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
 
-## Next Steps
+### For Linux/Mac
+```bash
 
-1. **Run Airflow DAGs**:
-   - Navigate to the Airflow UI and trigger the DAGs.
+# Run the makefile script
+make up
+```
 
-2. **Explore Data**:
-   - Use the Streamlit dashboard to visualize transport data.
+## 🌐 Access Points
 
-3. **Extend the Pipeline**:
-   - Add new DAGs, dbt models, or dashboards as needed.
+Once running, access:
 
----
-
-## Troubleshooting
-
-- **Airflow UI Not Accessible**:
-  - Ensure the containers are running:
-    ```bash
-    docker-compose ps
-    ```
-  - Rebuild and restart services:
-    ```bash
-    make up
-    ```
-
-- **MinIO Buckets Not Created**:
-  - Run the bucket creation script:
-    ```bash
-    make create-buckets
-    ```
-
-- **Streamlit Dashboard Not Loading**:
-  - Check the logs:
-    ```bash
-    make logs
-    ```
+- **Web UI**: http://localhost:8000
+- **API Documentation**: http://localhost:8000/docs
+- **API Alternative Docs**: http://localhost:8000/redoc
+- **Health Check**: http://localhost:8000/api/health
