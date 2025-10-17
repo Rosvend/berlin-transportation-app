@@ -12,12 +12,10 @@ The purpose of this project is to build a modern, production-grade real-time dat
 
 This project covers the **end-to-end lifecycle** of a real-time data pipeline:
 - API data extraction
-- Ingestion into a raw zone
-- Loading into Snowflake
-- Transformation with dbt
-- DAG orchestration with Airflow
-- Dashboard visualization
-- CI/CD and automated data quality testing
+- Ingestion
+- Loading
+- Transformation
+- Map visualization
 
 ---
 

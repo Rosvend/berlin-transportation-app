@@ -1,4 +1,67 @@
 services:
+  # Redis - Caching service
+  redis:
+    image: redis:7-alpine
+    container_name: berlin_transport_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # Backend - FastAPI application
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: berlin_transport_backend
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      # Application
+      APP_NAME: "Berlin Transport Live"
+      ENVIRONMENT: "development"
+      DEBUG: "true"
+      
+      # API
+      BVG_API_BASE_URL: "https://v6.bvg.transport.rest"
+      API_TIMEOUT: "10"
+      
+      # Redis
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+      REDIS_DB: "0"
+      CACHE_TTL: "300"
+      
+      # Server
+      HOST: "0.0.0.0"
+      PORT: "8000"
+      WORKERS: "1"
+      
+      # Logging
+      LOG_LEVEL: "INFO"
+      
+      # CORS
+      CORS_ORIGINS: '["http://localhost:3000","http://localhost:8000"]'
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   # PostgreSQL - Airflow metadata database
   postgres:
     image: postgres:13
@@ -16,19 +79,8 @@ services:
       interval: 5s
       retries: 5
     restart: always
-
-  # Redis
-  redis:
-    image: redis:latest
-    container_name: bvg_redis
-    expose:
-      - 6379
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 30s
-      retries: 50
-    restart: always
+    profiles:
+      - airflow
 
   # Airflow Webserver
   airflow-webserver:
@@ -61,12 +113,9 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
     volumes:
-      - ./airflow/dags:/opt/airflow/dags
-      - ./extract:/opt/airflow/extract
-      - ./config:/opt/airflow/config
-      - ./scripts:/opt/airflow/scripts
+      - ./etl/airflow/dags:/opt/airflow/dags
+      - ./etl/extract:/opt/airflow/extract
       - ./data:/opt/airflow/data
-      - ./dbt:/opt/airflow/dbt
       - airflow_logs:/opt/airflow/logs
     ports:
       - "8080:8080"
@@ -76,6 +125,8 @@ services:
       timeout: 10s
       retries: 5
     restart: always
+    profiles:
+      - airflow
 
   # Airflow Scheduler
   airflow-scheduler:
@@ -97,7 +148,6 @@ services:
       AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
       AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
-      # Custom environment variables
       BVG_API_BASE_URL: ${BVG_API_BASE_URL}
       SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT}
       SNOWFLAKE_USER: ${SNOWFLAKE_USER}
@@ -107,11 +157,9 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
     volumes:
-      - ./airflow/dags:/opt/airflow/dags
-      - ./extract:/opt/airflow/extract
-      - ./config:/opt/airflow/config
+      - ./etl/airflow/dags:/opt/airflow/dags
+      - ./etl/extract:/opt/airflow/extract
       - ./data:/opt/airflow/data
-      - ./dbt:/opt/airflow/dbt
       - airflow_logs:/opt/airflow/logs
     command: scheduler
     healthcheck:
@@ -120,6 +168,8 @@ services:
       timeout: 10s
       retries: 5
     restart: always
+    profiles:
+      - airflow
 
   # Airflow Worker (for Celery execution)
   airflow-worker:
@@ -140,7 +190,6 @@ services:
       AIRFLOW__CORE__FERNET_KEY: ''
       AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
-      # Custom environment variables
       BVG_API_BASE_URL: ${BVG_API_BASE_URL}
       SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT}
       SNOWFLAKE_USER: ${SNOWFLAKE_USER}
@@ -150,11 +199,9 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
     volumes:
-      - ./airflow/dags:/opt/airflow/dags
-      - ./extract:/opt/airflow/extract
-      - ./config:/opt/airflow/config
+      - ./etl/airflow/dags:/opt/airflow/dags
+      - ./etl/extract:/opt/airflow/extract
       - ./data:/opt/airflow/data
-      - ./dbt:/opt/airflow/dbt
       - airflow_logs:/opt/airflow/logs
     command: celery worker
     healthcheck:
@@ -165,6 +212,8 @@ services:
       timeout: 10s
       retries: 5
     restart: always
+    profiles:
+      - airflow
 
   # MinIO - Local S3-compatible object storage
   minio:
@@ -185,6 +234,8 @@ services:
       timeout: 20s
       retries: 3
     restart: always
+    profiles:
+      - airflow
 
   # Streamlit Dashboard
   streamlit:
@@ -204,8 +255,11 @@ services:
     ports:
       - "8501:8501"
     restart: always
+    profiles:
+      - airflow
 
 volumes:
+  redis_data:
   postgres_db_volume:
   minio_data:
   airflow_logs:

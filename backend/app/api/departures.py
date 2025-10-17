@@ -1,25 +1,26 @@
 """
 API endpoints for departure information
 """
-from fastapi import APIRouter, HTTPException, Path, Query
+from fastapi import APIRouter, HTTPException, Path, Query, Depends
 from typing import List, Optional
 import logging
 
-from app.services.bvg_client import bvg_client
+from app.services.bvg_client import get_bvg_client, BVGClient
 from app.models.transport import DeparturesResponse, Departure, TransportLine, Station
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-@router.get("/departures/{station_id}")
+@router.get("/departures/{station_id}", response_model=DeparturesResponse)
 async def get_departures(
     station_id: str = Path(..., description="Station ID"),
-    duration: int = Query(60, ge=10, le=240, description="Duration in minutes to fetch departures")
+    duration: int = Query(60, ge=10, le=240, description="Duration in minutes to fetch departures"),
+    bvg_client: BVGClient = Depends(get_bvg_client)
 ):
     """Get live departures for a station"""
     try:
-        # Call BVG API
-        results = bvg_client.get_departures(station_id, duration)
+        # Call BVG API with correct method name
+        results = await bvg_client.get_stop_departures(station_id, duration=duration)
         
         if results is None:
             raise HTTPException(status_code=503, detail="BVG API unavailable")
@@ -39,7 +40,7 @@ async def get_departures(
                     line_data = dep.get('line', {})
                     line = TransportLine(
                         name=line_data.get('name', 'Unknown'),
-                        type=line_data.get('product', {}).get('short', 'unknown')
+                        type=line_data.get('product', {}).get('short', 'unknown') if isinstance(line_data.get('product'), dict) else line_data.get('product', 'unknown')
                     )
                     
                     # Create departure
@@ -75,5 +76,5 @@ async def get_departures(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to get departures for {station_id}: {e}")
+        logger.error(f"Failed to get departures for {station_id}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")

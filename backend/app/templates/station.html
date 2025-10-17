@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Station Departures - Berlin Transport Live</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><a href="/">🚇 Berlin Transport Live</a></h1>
+            <p class="subtitle">Station Departures</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Station Info -->
+        <section class="station-info">
+            <div id="stationHeader">
+                <h2 id="stationName">Loading...</h2>
+                <p id="stationId" class="station-meta">Station ID: {{ station_id }}</p>
+            </div>
+            <div class="controls">
+                <label for="durationSelect">Show next:</label>
+                <select id="durationSelect">
+                    <option value="30">30 minutes</option>
+                    <option value="60" selected>60 minutes</option>
+                    <option value="120">2 hours</option>
+                </select>
+                <button id="refreshBtn">🔄 Refresh</button>
+            </div>
+        </section>
+
+        <!-- Departures Table -->
+        <section class="departures-section">
+            <div id="lastUpdate" class="last-update"></div>
+            <div id="departuresContainer">
+                <div class="loading">Loading departures...</div>
+            </div>
+        </section>
+
+        <!-- Back Button -->
+        <section class="actions">
+            <a href="/" class="btn btn-secondary">← Back to Search</a>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Data provided by BVG Transport REST API</p>
+        </div>
+    </footer>
+
+    <script>
+        const STATION_ID = "{{ station_id }}";
+    </script>
+    <script src="/static/js/station.js"></script>
+</body>
+</html>

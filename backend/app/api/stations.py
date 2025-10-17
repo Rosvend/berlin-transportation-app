@@ -1,12 +1,12 @@
 """
 API endpoints for station search and information
 """
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List, Optional
 import logging
 
-from app.services.bvg_client import bvg_client
-from app.models.transport import Station, StationSearchResponse
+from app.services.bvg_client import get_bvg_client, BVGClient
+from app.models.transport import Station, StationSearchResponse, Location
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -20,18 +20,16 @@ FEATURED_STATIONS = [
     {"id": "900000100004", "name": "S Hackescher Markt", "type": "regional_hub"},
 ]
 
-@router.get("/stations/search")
+@router.get("/stations/search", response_model=StationSearchResponse)
 async def search_stations(
-    q: str = Query(..., description="Search query for station name"),
-    limit: int = Query(10, ge=1, le=50, description="Maximum number of results")
+    q: str = Query(..., description="Search query for station name", min_length=2),
+    limit: int = Query(10, ge=1, le=50, description="Maximum number of results"),
+    bvg_client: BVGClient = Depends(get_bvg_client)
 ):
     """Search for stations by name"""
     try:
-        if len(q.strip()) < 2:
-            raise HTTPException(status_code=400, detail="Query must be at least 2 characters")
-        
-        # Call BVG API
-        results = bvg_client.search_stations(q, results=limit)
+        # Call BVG API with correct method name
+        results = await bvg_client.search_locations(q, results=limit)
         
         if results is None:
             raise HTTPException(status_code=503, detail="BVG API unavailable")
@@ -47,7 +45,6 @@ async def search_stations(
             
             # Add location if available
             if 'location' in result and result['location']:
-                from app.models.transport import Location
                 station.location = Location(
                     latitude=result['location'].get('latitude', 0),
                     longitude=result['location'].get('longitude', 0)
@@ -60,7 +57,7 @@ async def search_stations(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Station search failed: {e}")
+        logger.error(f"Station search failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.get("/stations/featured")
@@ -79,21 +76,34 @@ async def get_featured_stations():
         return {"stations": stations}
         
     except Exception as e:
-        logger.error(f"Failed to get featured stations: {e}")
+        logger.error(f"Failed to get featured stations: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.get("/stations/{station_id}")
-async def get_station_info(station_id: str):
+async def get_station_info(
+    station_id: str,
+    bvg_client: BVGClient = Depends(get_bvg_client)
+):
     """Get information about a specific station"""
     try:
-        # For now, just return basic info
-        # Later you could enhance this with additional API calls
-        return {
-            "id": station_id,
-            "name": f"Station {station_id}",  # Would be fetched from API
-            "type": "stop"
-        }
+        # Fetch actual station info from BVG API
+        info = await bvg_client.get_stop_info(station_id)
+        
+        station = Station(
+            id=info.get('id', station_id),
+            name=info.get('name', f'Station {station_id}'),
+            type=info.get('type', 'stop')
+        )
+        
+        # Add location if available
+        if 'location' in info and info['location']:
+            station.location = Location(
+                latitude=info['location'].get('latitude', 0),
+                longitude=info['location'].get('longitude', 0)
+            )
+        
+        return station
         
     except Exception as e:
-        logger.error(f"Failed to get station info: {e}")
+        logger.error(f"Failed to get station info for {station_id}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
