@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Berlin Transportation</title>
+
+  <!-- Tus estilos -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+</head>
+<body>
+  <header>
+    <h1>Berlin Transportation</h1>
+    <div class="actions">
+      <input id="search" placeholder="Ej: Alexanderplatz" />
+      <button id="btnSearch">Ir</button>
+    </div>
+  </header>
+
+  <main>
+    <aside id="panel">
+      <div id="status">Mapa listo ✅</div>
+      <ul id="results">
+        <li data-lat="52.5219" data-lng="13.4132">Alexanderplatz</li>
+        <li data-lat="52.5251" data-lng="13.3694">Hauptbahnhof</li>
+      </ul>
+    </aside>
+
+    <!-- Contenedor del mapa -->
+    <section id="map"></section>
+  </main>
+
+  <footer>
+    <small>Demo local con Leaflet</small>
+  </footer>
+
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <!-- Script mínimo para iniciar el mapa -->
+  <script>
+    // Crear el mapa centrado en Berlín
+    const map = L.map('map', { zoomControl: true })
+      .setView([52.520008, 13.404954], 12); // Berlín
+
+    // Capa base OSM
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Marcador de ejemplo
+    let marker = L.marker([52.520008, 13.404954]).addTo(map);
+    marker.bindPopup('<b>Berlín</b><br/>Mapa funcionando.').openPopup();
+
+    // Click en resultados del panel para mover el mapa
+    document.getElementById('results').addEventListener('click', (e) => {
+      const li = e.target.closest('li');
+      if (!li) return;
+      const lat = parseFloat(li.dataset.lat);
+      const lng = parseFloat(li.dataset.lng);
+      map.setView([lat, lng], 15);
+      if (marker) marker.remove();
+      marker = L.marker([lat, lng]).addTo(map).bindPopup(li.textContent).openPopup();
+    });
+
+    // Búsqueda simple (mock): Alexanderplatz / Hauptbahnhof
+    document.getElementById('btnSearch').addEventListener('click', () => {
+      const q = document.getElementById('search').value.trim().toLowerCase();
+      const options = {
+        'alexanderplatz': [52.5219, 13.4132],
+        'hauptbahnhof': [52.5251, 13.3694],
+      };
+      if (options[q]) {
+        const [lat, lng] = options[q];
+        map.setView([lat, lng], 15);
+        if (marker) marker.remove();
+        marker = L.marker([lat, lng]).addTo(map).bindPopup(q).openPopup();
+      } else {
+        alert('Prueba "Alexanderplatz" o "Hauptbahnhof" (mock).');
+      }
+    });
+
+    // Arreglo típico: asegurar que el mapa calcule bien el tamaño al cargar
+    setTimeout(() => map.invalidateSize(), 0);
+  </script>
+</body>
+</html>

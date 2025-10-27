@@ -1,0 +1,27 @@
+/* Reset y tokens */
+*{box-sizing:border-box} :root{--bg:#f8fafc;--fg:#0f172a;--muted:#64748b;--b:#e2e8f0;--accent:#0ea5e9}
+html,body{height:100%}
+body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;color:var(--fg);background:#fff}
+
+/* Layout móvil primero */
+header,footer{padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--b)}
+header h1{margin:0;font-size:18px}
+main{display:flex;flex-direction:column;gap:12px;padding:12px}
+#panel{order:1;border:1px solid var(--b);border-radius:12px;padding:12px}
+#status{font-size:12px;color:var(--muted);margin-bottom:8px}
+#results{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+#results li{padding:10px;border:1px solid var(--b);border-radius:10px;cursor:pointer}
+#results li:hover{background:var(--bg)}
+#map{height:60vh;border:1px solid var(--b);border-radius:12px}
+
+/* Controles */
+.actions{display:flex;gap:8px;margin-top:8px}
+.actions input{flex:1;min-width:0;padding:10px;border:1px solid var(--b);border-radius:10px}
+.actions button{padding:10px 14px;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:10px;cursor:pointer}
+
+/* Tablet/desktop */
+@media (min-width: 980px){
+  main{flex-direction:row;height:calc(100vh - 96px);padding:16px}
+  #panel{width:360px;height:100%;overflow:auto}
+  #map{flex:1;height:100%}
+}
