@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Berlin Transport Live</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🚇 Berlin Transport Live</h1>
+            <p class="subtitle">Real-time departure information for Berlin's public transport network</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Search Section -->
+        <section class="search-section">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="stationSearch" 
+                    placeholder="Search for a station (e.g., Alexanderplatz)..." 
+                    autocomplete="off"
+                    minlength="2"
+                >
+                <button id="searchBtn">Search</button>
+            </div>
+            <div id="searchResults" class="search-results"></div>
+        </section>
+
+        <!-- Featured Stations -->
+        <section class="featured-section">
+            <h2>Major Transport Hubs</h2>
+            <div id="featuredStations" class="station-grid">
+                <div class="loading">Loading featured stations...</div>
+            </div>
+        </section>
+
+        <!-- Map Section -->
+        <section class="map-section">
+            <h2>Station Map</h2>
+            <div id="map" class="map-container"></div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Data provided by BVG Transport REST API | Built with FastAPI & Leaflet</p>
+            <p><a href="/docs">API Documentation</a> | <a href="/api/health">API Health</a></p>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
