@@ -123,6 +123,16 @@ backend/
 - `GET /api/info` - API information
 - `GET /docs` - Interactive API documentation (Swagger UI)
 
+### Testing with Postman
+
+A complete Postman collection is available at the project root: `Berlin_Transport_API.postman_collection.json`
+
+**To import:**
+1. Open Postman
+2. Click "Import" button
+3. Select the `Berlin_Transport_API.postman_collection.json` file
+4. The collection includes automated tests for all endpoints
+
 ## Configuration
 
 Configuration is managed through environment variables (see `.env.example`):
