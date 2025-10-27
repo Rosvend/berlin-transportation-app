@@ -104,14 +104,14 @@ services:
       AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
       AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
       # Custom environment variables
-      BVG_API_BASE_URL: ${BVG_API_BASE_URL}
-      SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT}
-      SNOWFLAKE_USER: ${SNOWFLAKE_USER}
-      SNOWFLAKE_PASSWORD: ${SNOWFLAKE_PASSWORD}
-      SNOWFLAKE_DATABASE: ${SNOWFLAKE_DATABASE}
-      SNOWFLAKE_WAREHOUSE: ${SNOWFLAKE_WAREHOUSE}
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      BVG_API_BASE_URL: ${BVG_API_BASE_URL:-https://v6.bvg.transport.rest}
+      SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT:-}
+      SNOWFLAKE_USER: ${SNOWFLAKE_USER:-}
+      SNOWFLAKE_PASSWORD: ${SNOWFLAKE_PASSWORD:-}
+      SNOWFLAKE_DATABASE: ${SNOWFLAKE_DATABASE:-}
+      SNOWFLAKE_WAREHOUSE: ${SNOWFLAKE_WAREHOUSE:-}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
     volumes:
       - ./etl/airflow/dags:/opt/airflow/dags
       - ./etl/extract:/opt/airflow/extract
@@ -148,14 +148,14 @@ services:
       AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
       AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
-      BVG_API_BASE_URL: ${BVG_API_BASE_URL}
-      SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT}
-      SNOWFLAKE_USER: ${SNOWFLAKE_USER}
-      SNOWFLAKE_PASSWORD: ${SNOWFLAKE_PASSWORD}
-      SNOWFLAKE_DATABASE: ${SNOWFLAKE_DATABASE}
-      SNOWFLAKE_WAREHOUSE: ${SNOWFLAKE_WAREHOUSE}
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      BVG_API_BASE_URL: ${BVG_API_BASE_URL:-https://v6.bvg.transport.rest}
+      SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT:-}
+      SNOWFLAKE_USER: ${SNOWFLAKE_USER:-}
+      SNOWFLAKE_PASSWORD: ${SNOWFLAKE_PASSWORD:-}
+      SNOWFLAKE_DATABASE: ${SNOWFLAKE_DATABASE:-}
+      SNOWFLAKE_WAREHOUSE: ${SNOWFLAKE_WAREHOUSE:-}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
     volumes:
       - ./etl/airflow/dags:/opt/airflow/dags
       - ./etl/extract:/opt/airflow/extract
@@ -190,14 +190,14 @@ services:
       AIRFLOW__CORE__FERNET_KEY: ''
       AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
-      BVG_API_BASE_URL: ${BVG_API_BASE_URL}
-      SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT}
-      SNOWFLAKE_USER: ${SNOWFLAKE_USER}
-      SNOWFLAKE_PASSWORD: ${SNOWFLAKE_PASSWORD}
-      SNOWFLAKE_DATABASE: ${SNOWFLAKE_DATABASE}
-      SNOWFLAKE_WAREHOUSE: ${SNOWFLAKE_WAREHOUSE}
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      BVG_API_BASE_URL: ${BVG_API_BASE_URL:-https://v6.bvg.transport.rest}
+      SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT:-}
+      SNOWFLAKE_USER: ${SNOWFLAKE_USER:-}
+      SNOWFLAKE_PASSWORD: ${SNOWFLAKE_PASSWORD:-}
+      SNOWFLAKE_DATABASE: ${SNOWFLAKE_DATABASE:-}
+      SNOWFLAKE_WAREHOUSE: ${SNOWFLAKE_WAREHOUSE:-}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
     volumes:
       - ./etl/airflow/dags:/opt/airflow/dags
       - ./etl/extract:/opt/airflow/extract
@@ -220,8 +220,8 @@ services:
     image: minio/minio:latest
     container_name: bvg_minio
     environment:
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
     volumes:
       - minio_data:/data
     ports:
@@ -244,11 +244,11 @@ services:
       dockerfile: docker/Dockerfile.streamlit
     container_name: bvg_streamlit
     environment:
-      SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT}
-      SNOWFLAKE_USER: ${SNOWFLAKE_USER}
-      SNOWFLAKE_PASSWORD: ${SNOWFLAKE_PASSWORD}
-      SNOWFLAKE_DATABASE: ${SNOWFLAKE_DATABASE}
-      SNOWFLAKE_WAREHOUSE: ${SNOWFLAKE_WAREHOUSE}
+      SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT:-}
+      SNOWFLAKE_USER: ${SNOWFLAKE_USER:-}
+      SNOWFLAKE_PASSWORD: ${SNOWFLAKE_PASSWORD:-}
+      SNOWFLAKE_DATABASE: ${SNOWFLAKE_DATABASE:-}
+      SNOWFLAKE_WAREHOUSE: ${SNOWFLAKE_WAREHOUSE:-}
     volumes:
       - ./dashboards:/app/dashboards
       - ./config:/app/config

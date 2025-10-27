@@ -17,14 +17,24 @@ help:
 # Install dependencies
 install:
 	@echo "Installing dependencies..."
-	pip install -r requirements.txt
+	@if command -v uv >/dev/null 2>&1; then \
+		echo "Using uv..."; \
+		uv sync; \
+	else \
+		echo "Using pip..."; \
+		pip install -e .; \
+	fi
 	@echo "✅ Dependencies installed"
 
 # Run development server
 dev:
 	@echo "Starting development server..."
 	@if [ ! -f .env ]; then cp .env.example .env; fi
-	cd backend && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+	@if command -v uv >/dev/null 2>&1; then \
+		cd backend && uv run python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000; \
+	else \
+		cd backend && python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000; \
+	fi
 
 # Start Docker services
 docker-up:

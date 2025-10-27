@@ -30,23 +30,28 @@ PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
 echo " Python version: $PYTHON_VERSION"
 
 # Install/update dependencies
-echo " Installing dependencies..."
+echo "📦 Installing dependencies..."
 if command -v uv &> /dev/null; then
     echo "Using uv for faster dependency installation..."
-    uv pip install -r pyproject.toml
+    uv sync
 else
     echo "Using pip for dependency installation..."
-    pip install -r pyproject.toml
+    pip install -e .
 fi
 
-echo " Dependencies installed"
+echo "✅ Dependencies installed"
 
 # Run application
 echo "🚀 Starting FastAPI application..."
-echo " Web UI will be available at: http://localhost:8000"
-echo " API docs will be available at: http://localhost:8000/docs"
+echo "📍 Web UI will be available at: http://localhost:8000"
+echo "📍 API docs will be available at: http://localhost:8000/docs"
 echo "============================================================"
 echo ""
 
+# Use uv run to ensure correct Python environment
 cd backend
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+if command -v uv &> /dev/null; then
+    uv run python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+else
+    python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+fi
