@@ -1,0 +1,720 @@
+{
+	"info": {
+		"_postman_id": "berlin-transport-api-2025",
+		"name": "Berlin Transport Live API",
+		"description": "Complete API collection for Berlin Transport Live - Real-time public transport information system\n\nBase URL: http://localhost:8000\n\nFeatures:\n- Station search and information\n- Real-time departure data\n- Featured transport hubs\n- Health monitoring",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "berlin-transport-2025"
+	},
+	"item": [
+		{
+			"name": "System Endpoints",
+			"item": [
+				{
+					"name": "Health Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has status field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('status');",
+									"    pm.expect(jsonData.status).to.eql('healthy');",
+									"});",
+									"",
+									"pm.test(\"Response has service info\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('service');",
+									"    pm.expect(jsonData).to.have.property('version');",
+									"    pm.expect(jsonData).to.have.property('environment');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"health"
+							]
+						},
+						"description": "Check the health status of the API. Returns service information, version, and environment."
+					},
+					"response": []
+				},
+				{
+					"name": "API Info",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has endpoints list\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('endpoints');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/info",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"info"
+							]
+						},
+						"description": "Get API information including available endpoints and their descriptions."
+					},
+					"response": []
+				}
+			],
+			"description": "System health and information endpoints"
+		},
+		{
+			"name": "Stations",
+			"item": [
+				{
+					"name": "Search Stations",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has stations array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('stations');",
+									"    pm.expect(jsonData.stations).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Response has query field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('query');",
+									"});",
+									"",
+									"pm.test(\"Stations have required fields\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.stations.length > 0) {",
+									"        var station = jsonData.stations[0];",
+									"        pm.expect(station).to.have.property('id');",
+									"        pm.expect(station).to.have.property('name');",
+									"        pm.expect(station).to.have.property('type');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/stations/search?q=alexanderplatz&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"stations",
+								"search"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "alexanderplatz",
+									"description": "Search query (minimum 2 characters)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Maximum number of results (1-50)"
+								}
+							]
+						},
+						"description": "Search for stations by name. Returns a list of matching stations with their IDs, names, types, and optional location data.\n\n**Query Parameters:**\n- `q` (required): Search query, minimum 2 characters\n- `limit` (optional): Maximum results, 1-50, default 10"
+					},
+					"response": []
+				},
+				{
+					"name": "Search Stations - Potsdamer Platz",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Returns results for Potsdamer Platz\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.query).to.include('potsdamer');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/stations/search?q=potsdamer&limit=5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"stations",
+								"search"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "potsdamer"
+								},
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						},
+						"description": "Example search for Potsdamer Platz station"
+					},
+					"response": []
+				},
+				{
+					"name": "Search Stations - Berlin Hbf",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/stations/search?q=hauptbahnhof&limit=5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"stations",
+								"search"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "hauptbahnhof"
+								},
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						},
+						"description": "Example search for Berlin Hauptbahnhof (main station)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Featured Stations",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has stations array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('stations');",
+									"    pm.expect(jsonData.stations).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Featured stations include major hubs\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.stations.length).to.be.greaterThan(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/stations/featured",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"stations",
+								"featured"
+							]
+						},
+						"description": "Get a curated list of featured major transport hubs in Berlin, including:\n- S+U Alexanderplatz\n- S+U Potsdamer Platz\n- S+U Friedrichstraße\n- S+U Zoologischer Garten\n- S Hackescher Markt"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Station Info - Alexanderplatz",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Station has required fields\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('name');",
+									"    pm.expect(jsonData).to.have.property('type');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/stations/900000100003",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"stations",
+								"900000100003"
+							]
+						},
+						"description": "Get detailed information about a specific station by ID. This example uses Alexanderplatz station ID.\n\n**Path Parameter:**\n- `station_id`: The unique BVG station identifier"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Station Info - Potsdamer Platz",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/stations/900000003201",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"stations",
+								"900000003201"
+							]
+						},
+						"description": "Get information for Potsdamer Platz station"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for searching and retrieving station information"
+		},
+		{
+			"name": "Departures",
+			"item": [
+				{
+					"name": "Get Departures - Alexanderplatz",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has station info\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('station');",
+									"    pm.expect(jsonData.station).to.have.property('id');",
+									"    pm.expect(jsonData.station).to.have.property('name');",
+									"});",
+									"",
+									"pm.test(\"Response has departures array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('departures');",
+									"    pm.expect(jsonData.departures).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Departures have required fields\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.departures.length > 0) {",
+									"        var departure = jsonData.departures[0];",
+									"        pm.expect(departure).to.have.property('line');",
+									"        pm.expect(departure).to.have.property('direction');",
+									"        pm.expect(departure).to.have.property('when');",
+									"        pm.expect(departure.line).to.have.property('name');",
+									"        pm.expect(departure.line).to.have.property('type');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/departures/900000100003?duration=60",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"departures",
+								"900000100003"
+							],
+							"query": [
+								{
+									"key": "duration",
+									"value": "60",
+									"description": "Duration in minutes (10-240)"
+								}
+							]
+						},
+						"description": "Get real-time departures for Alexanderplatz station for the next 60 minutes.\n\n**Path Parameter:**\n- `station_id`: The station ID\n\n**Query Parameters:**\n- `duration` (optional): Duration in minutes to fetch departures (10-240, default: 60)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Departures - Short Duration (30 min)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/departures/900000100003?duration=30",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"departures",
+								"900000100003"
+							],
+							"query": [
+								{
+									"key": "duration",
+									"value": "30"
+								}
+							]
+						},
+						"description": "Get departures for the next 30 minutes"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Departures - Potsdamer Platz",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/departures/900000003201?duration=60",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"departures",
+								"900000003201"
+							],
+							"query": [
+								{
+									"key": "duration",
+									"value": "60"
+								}
+							]
+						},
+						"description": "Get real-time departures for Potsdamer Platz"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Departures - Friedrichstraße",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/departures/900000024101?duration=90",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"departures",
+								"900000024101"
+							],
+							"query": [
+								{
+									"key": "duration",
+									"value": "90"
+								}
+							]
+						},
+						"description": "Get real-time departures for Friedrichstraße station for the next 90 minutes"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Departures - Zoologischer Garten",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/departures/900000100001?duration=120",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"departures",
+								"900000100001"
+							],
+							"query": [
+								{
+									"key": "duration",
+									"value": "120"
+								}
+							]
+						},
+						"description": "Get real-time departures for Zoologischer Garten for the next 2 hours"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Departures - Invalid Station (404)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Error message is returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('detail');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/departures/invalid_station_id?duration=60",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"departures",
+								"invalid_station_id"
+							],
+							"query": [
+								{
+									"key": "duration",
+									"value": "60"
+								}
+							]
+						},
+						"description": "Test error handling for invalid station ID (should return 404)"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for retrieving real-time departure information"
+		},
+		{
+			"name": "Web UI",
+			"item": [
+				{
+					"name": "Homepage",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						},
+						"description": "Access the web UI homepage with station search functionality"
+					},
+					"response": []
+				},
+				{
+					"name": "Station Page - Alexanderplatz",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/station/900000100003",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"station",
+								"900000100003"
+							]
+						},
+						"description": "View station details page with live departures for Alexanderplatz"
+					},
+					"response": []
+				}
+			],
+			"description": "Web UI endpoints (HTML pages)"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		}
+	]
+}
