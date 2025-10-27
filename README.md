@@ -81,8 +81,6 @@ berlin-transport-pipeline/
 ├── transform/                # Transformation logic
 ├── docker-compose.yml        # Orchestration of local stack
 ├── makefile                  # Makefile for convenience commands
-├── requirements-streamlit.txt
-├── requirements.txt
 ├── .env                      # Secrets + credentials
 ├── README.md                 # Project documentation
 ├── .gitignore                # Git ignore file
@@ -99,7 +97,7 @@ berlin-transport-pipeline/
 cd berlin-transportation-app
 
 # Run the dev startup script
-./start-dev.sh
+uv run ./start-dev.sh
 ```
 
 This will:

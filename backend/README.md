@@ -62,10 +62,10 @@ backend/
 3. **Install dependencies**
    ```bash
    # Using uv (recommended)
-   uv pip install -r pyproject.toml
+   uv sync
 
    # Or using pip
-   pip install -r pyproject.toml
+   uv pip install -r pyproject.toml
    ```
 
 4. **Start Redis** (if not using Docker)
