@@ -9,6 +9,7 @@ from datetime import datetime
 import pytz
 from typing import Dict, List, Optional, Union
 from dotenv import load_dotenv
+import time
 
 # Load environment variables
 load_dotenv()
@@ -22,8 +23,45 @@ class BVGClient:
     def __init__(self):
         self.api_url = os.getenv("BVG_API_BASE_URL", "https://v6.bvg.transport.rest")
         self.session = requests.Session()
-        # Set a reasonable timeout
-        self.session.timeout = 10
+        # Set a reasonable timeout (will be passed to each request)
+        self.timeout = 10
+        self.max_retries = 3
+        self.retry_delay = 1  # seconds
+    
+    def _make_request(self, url: str) -> Optional[Dict]:
+        """Make HTTP request with retry logic"""
+        last_error = None
+        
+        for attempt in range(self.max_retries):
+            try:
+                logger.info(f"Making request (attempt {attempt + 1}/{self.max_retries}): {url}")
+                response = self.session.get(url, timeout=self.timeout)
+                response.raise_for_status()
+                return response.json()
+            except requests.exceptions.Timeout as e:
+                last_error = e
+                logger.warning(f"Request timeout (attempt {attempt + 1}): {e}")
+            except requests.exceptions.ConnectionError as e:
+                last_error = e
+                logger.warning(f"Connection error (attempt {attempt + 1}): {e}")
+            except requests.exceptions.HTTPError as e:
+                # Don't retry on 4xx errors (client errors)
+                if 400 <= e.response.status_code < 500:
+                    logger.error(f"Client error: {e}")
+                    return None
+                last_error = e
+                logger.warning(f"HTTP error (attempt {attempt + 1}): {e}")
+            except Exception as e:
+                last_error = e
+                logger.error(f"Unexpected error: {e}")
+                return None
+            
+            # Wait before retrying (except on last attempt)
+            if attempt < self.max_retries - 1:
+                time.sleep(self.retry_delay * (attempt + 1))
+        
+        logger.error(f"All retry attempts failed. Last error: {last_error}")
+        return None
     
     def convert_to_utc(self, timestamp_ms: Optional[int]) -> Optional[str]:
         """Convert timestamp in milliseconds to UTC datetime string"""
@@ -64,16 +102,10 @@ class BVGClient:
                f"polylines={polylines}")
         
         try:
-            logger.info(f"Making radar request to: {url}")
-            response = self.session.get(url)
-            response.raise_for_status()
-            
-            data = response.json()
-            processed_data = self.process_radar_data(data)
-            return processed_data
-            
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Radar API request failed: {e}")
+            data = self._make_request(url)
+            if data:
+                processed_data = self.process_radar_data(data)
+                return processed_data
             return None
         except Exception as e:
             logger.error(f"Unexpected error in get_radar: {e}")
@@ -85,10 +117,10 @@ class BVGClient:
         
         try:
             logger.info(f"Searching stations: {query}")
-            response = self.session.get(url)
-            response.raise_for_status()
+            data = self._make_request(url)
             
-            data = response.json()
+            if data is None:
+                return None
             
             # Filter only stations/stops
             if isinstance(data, list):
@@ -96,9 +128,6 @@ class BVGClient:
                 return stations
             return []
             
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Station search failed: {e}")
-            return None
         except Exception as e:
             logger.error(f"Unexpected error in search_stations: {e}")
             return None
@@ -109,10 +138,10 @@ class BVGClient:
         
         try:
             logger.info(f"Getting departures for station: {station_id}")
-            response = self.session.get(url)
-            response.raise_for_status()
+            data = self._make_request(url)
             
-            data = response.json()
+            if data is None:
+                return None
             
             # Process departure times
             if isinstance(data, dict) and 'departures' in data:
@@ -126,9 +155,6 @@ class BVGClient:
             
             return data
             
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Departures API request failed: {e}")
-            return None
         except Exception as e:
             logger.error(f"Unexpected error in get_departures: {e}")
             return None

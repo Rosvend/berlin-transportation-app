@@ -22,10 +22,13 @@ async def get_departures(
         results = bvg_client.get_departures(station_id, duration)
         
         if results is None:
-            raise HTTPException(status_code=503, detail="BVG API unavailable")
+            raise HTTPException(
+                status_code=503, 
+                detail="El servicio de BVG no está disponible en este momento. Por favor, intenta de nuevo en unos segundos."
+            )
         
         if not results:
-            raise HTTPException(status_code=404, detail="Station not found")
+            raise HTTPException(status_code=404, detail="Estación no encontrada")
         
         # Convert to our models
         departures = []
@@ -35,11 +38,23 @@ async def get_departures(
         if isinstance(departures_data, list):
             for dep in departures_data:
                 try:
-                    # Extract line information
+                    # Skip if dep is not a dict
+                    if not isinstance(dep, dict):
+                        logger.warning(f"Skipping non-dict departure: {type(dep)}")
+                        continue
+                    
+                    # Extract line information safely
                     line_data = dep.get('line', {})
+                    if not isinstance(line_data, dict):
+                        line_data = {}
+                    
+                    product_data = line_data.get('product', {})
+                    if not isinstance(product_data, dict):
+                        product_data = {}
+                    
                     line = TransportLine(
                         name=line_data.get('name', 'Unknown'),
-                        type=line_data.get('product', {}).get('short', 'unknown')
+                        type=product_data.get('short', 'unknown')
                     )
                     
                     # Create departure
@@ -54,13 +69,17 @@ async def get_departures(
                     departures.append(departure)
                     
                 except Exception as e:
-                    logger.warning(f"Failed to process departure: {e}")
+                    logger.warning(f"Failed to process departure: {e} - {type(dep)}")
                     continue
         
         # Create station info
+        station_data = results.get('stop', {})
+        if not isinstance(station_data, dict):
+            station_data = {}
+            
         station = Station(
             id=station_id,
-            name=results.get('stop', {}).get('name', f'Station {station_id}'),
+            name=station_data.get('name', f'Station {station_id}'),
             type='stop'
         )
         

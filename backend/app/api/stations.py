@@ -20,6 +20,16 @@ FEATURED_STATIONS = [
     {"id": "900000100004", "name": "S Hackescher Markt", "type": "regional_hub"},
 ]
 
+@router.get("/stations/all")
+async def get_all_stations():
+    """Get all available stations"""
+    try:
+        # Por ahora, devolvemos las estaciones destacadas
+        return FEATURED_STATIONS
+    except Exception as e:
+        logger.error(f"Error getting all stations: {e}")
+        raise HTTPException(status_code=500, detail="Error getting stations")
+
 @router.get("/stations/search")
 async def search_stations(
     q: str = Query(..., description="Search query for station name"),
@@ -34,7 +44,10 @@ async def search_stations(
         results = bvg_client.search_stations(q, results=limit)
         
         if results is None:
-            raise HTTPException(status_code=503, detail="BVG API unavailable")
+            raise HTTPException(
+                status_code=503, 
+                detail="El servicio de BVG no está disponible en este momento. Por favor, intenta de nuevo en unos segundos."
+            )
         
         # Convert to our Station model
         stations = []
