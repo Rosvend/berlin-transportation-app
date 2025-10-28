@@ -1,6 +1,7 @@
 """
 BVG API Client Service
 Refactored from extract/departures.py for web application use
+OPTIMIZED: Reduced timeout and retries for better performance
 """
 import os
 import requests
@@ -10,6 +11,7 @@ import pytz
 from typing import Dict, List, Optional, Union
 from dotenv import load_dotenv
 import time
+from app.utils.cache import cached
 
 # Load environment variables
 load_dotenv()
@@ -23,10 +25,11 @@ class BVGClient:
     def __init__(self):
         self.api_url = os.getenv("BVG_API_BASE_URL", "https://v6.bvg.transport.rest")
         self.session = requests.Session()
-        # Set a reasonable timeout (will be passed to each request)
-        self.timeout = 10
-        self.max_retries = 3
-        self.retry_delay = 1  # seconds
+        # OPTIMIZED: Reduced timeout from 10s to 5s for faster failures
+        self.timeout = 5
+        # OPTIMIZED: Reduced retries from 3 to 1 (fail-fast approach)
+        self.max_retries = 1
+        self.retry_delay = 0.5  # seconds (reduced from 1s)
     
     def _make_request(self, url: str) -> Optional[Dict]:
         """Make HTTP request with retry logic"""
@@ -111,8 +114,9 @@ class BVGClient:
             logger.error(f"Unexpected error in get_radar: {e}")
             return None
     
+    @cached(ttl=300)  # Cache for 5 minutes
     def search_stations(self, query: str, results: int = 10) -> Optional[List[Dict]]:
-        """Search for stations by name"""
+        """Search for stations by name - CACHED"""
         url = f"{self.api_url}/locations?query={query}&results={results}"
         
         try:
@@ -132,8 +136,9 @@ class BVGClient:
             logger.error(f"Unexpected error in search_stations: {e}")
             return None
     
+    @cached(ttl=60)  # Cache for 1 minute (departures change frequently)
     def get_departures(self, station_id: str, duration: int = 60) -> Optional[Dict]:
-        """Get departures for a specific station"""
+        """Get departures for a specific station - CACHED"""
         url = f"{self.api_url}/stops/{station_id}/departures?duration={duration}"
         
         try:

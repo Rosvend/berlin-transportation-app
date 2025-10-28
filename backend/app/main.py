@@ -10,6 +10,7 @@ from fastapi.responses import HTMLResponse
 
 # Import your API routers
 from app.api import stations, departures
+from app.utils import get_cache_stats, clear_cache, cleanup_cache
 
 # Create FastAPI instance
 app = FastAPI(
@@ -53,6 +54,27 @@ async def station_page(request: Request, station_id: str):
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "service": "berlin-transport-web"}
+
+@app.get("/api/cache/stats")
+async def cache_stats():
+    """Get cache statistics"""
+    stats = get_cache_stats()
+    return {
+        "cache": stats,
+        "description": "Cache statistics for BVG API requests"
+    }
+
+@app.post("/api/cache/clear")
+async def clear_cache_endpoint():
+    """Clear all cached data"""
+    clear_cache()
+    return {"message": "Cache cleared successfully"}
+
+@app.post("/api/cache/cleanup")
+async def cleanup_cache_endpoint():
+    """Remove expired cache entries"""
+    removed = cleanup_cache()
+    return {"message": f"Removed {removed} expired entries"}
 
 if __name__ == "__main__":
     import uvicorn
