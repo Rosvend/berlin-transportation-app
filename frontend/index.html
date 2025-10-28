@@ -8,6 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -15,14 +17,14 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="#">Berlin Transport</a>
+            <a class="navbar-brand" href="#">Transporte Berlín</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#">Stations</a>
+                        <a class="nav-link active" href="#">Estaciones</a>
                     </li>
                 </ul>
             </div>
@@ -36,11 +38,11 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Search Station</h5>
+                        <h5 class="card-title">Buscar Estación</h5>
                         <div id="search-container">
                             <div class="input-group mb-3">
-                                <input type="text" class="form-control" placeholder="Enter station name..." id="station-search">
-                                <button class="btn btn-outline-primary" type="button" id="search-button">Search</button>
+                                <input type="text" class="form-control" placeholder="Ingrese el nombre de la estación..." id="station-search">
+                                <button class="btn btn-outline-primary" type="button" id="search-button">Buscar</button>
                             </div>
                         </div>
                     </div>
@@ -51,9 +53,18 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Station Results</h5>
+                        <h5 class="card-title">Resultados de la Búsqueda</h5>
                         <div id="results-container">
-                            <p class="text-muted">Search for a station to see results</p>
+                            <p class="text-muted">Busca una estación para ver los resultados</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Departures Section -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Próximas Salidas</h5>
+                        <div id="departures-container">
+                            <p class="text-muted">Selecciona una estación para ver los horarios</p>
                         </div>
                     </div>
                 </div>
@@ -65,8 +76,18 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Transport Map</h5>
+                        <h5 class="card-title">Mapa de Transporte</h5>
                         <div id="map"></div>
+                        <div class="mt-2">
+                            <div class="d-flex gap-3 flex-wrap" id="map-controls">
+                                <button class="btn btn-sm btn-outline-primary" id="show-all-stations">
+                                    <i class="fas fa-globe"></i> Mostrar Todas las Estaciones
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" id="center-map">
+                                    <i class="fas fa-crosshairs"></i> Centrar Mapa
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
