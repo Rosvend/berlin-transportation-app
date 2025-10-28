@@ -1,4 +1,33 @@
 services:
+  # Frontend Web Application
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: bvg_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: always
+
+  # Backend API Service
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: bvg_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - BVG_API_BASE_URL=${BVG_API_BASE_URL}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
+
   # PostgreSQL - Airflow metadata database
   postgres:
     image: postgres:13

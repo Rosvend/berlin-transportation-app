@@ -3,6 +3,7 @@ FastAPI Web Application for Berlin Transport
 Main application entry point
 """
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
@@ -15,6 +16,19 @@ app = FastAPI(
     title="Berlin Transport Live",
     description="Real-time Berlin public transport information",
     version="1.0.0"
+)
+
+# Enable CORS so the frontend (served on another port) can call the API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3001",
+        "http://localhost:3000",
+        "http://localhost",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Set up templates and static files
