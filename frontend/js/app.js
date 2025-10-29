@@ -731,9 +731,8 @@ function displayFavorites() {
     if (favorites.length === 0) {
         resultsContainer.innerHTML = `
             <div class="alert alert-info">
-                <i class="fas fa-star"></i> 
                 <strong>No tienes estaciones favoritas</strong>
-                <p class="mb-0 mt-2">Marca estaciones como favoritas haciendo clic en la estrella ⭐</p>
+                <p class="mb-0 mt-2">Marca estaciones como favoritas haciendo clic en el botón de favorito</p>
             </div>`;
         return;
     }
@@ -741,7 +740,7 @@ function displayFavorites() {
     // Mostrar encabezado
     resultsContainer.innerHTML = `
         <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-            <h6 class="mb-0"><i class="fas fa-star text-warning"></i> Tus Favoritos (${favorites.length})</h6>
+            <h6 class="mb-0">Tus Favoritos (${favorites.length})</h6>
             <button class="btn btn-sm btn-outline-danger" onclick="clearFavorites()"
                     title="Eliminar todos los favoritos guardados">
                 <i class="fas fa-trash"></i> Limpiar

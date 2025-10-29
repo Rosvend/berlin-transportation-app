@@ -78,11 +78,22 @@ _cache = SimpleCache()
 
 def make_cache_key(*args, **kwargs) -> str:
     """Create a cache key from function arguments"""
-    # Combine args and kwargs into a string
-    key_data = json.dumps({
-        "args": args,
-        "kwargs": sorted(kwargs.items())
-    }, sort_keys=True)
+    # Skip first arg if it looks like 'self' (for instance methods)
+    # by checking if args exist and making hashable copies
+    args_to_hash = args
+    if args and hasattr(args[0], '__dict__'):
+        # Likely a 'self' parameter, skip it
+        args_to_hash = args[1:]
+    
+    # Convert args to strings for JSON serialization
+    try:
+        key_data = json.dumps({
+            "args": [str(arg) for arg in args_to_hash],
+            "kwargs": sorted([(k, str(v)) for k, v in kwargs.items()])
+        }, sort_keys=True)
+    except (TypeError, ValueError):
+        # Fallback to string representation
+        key_data = f"args:{args_to_hash}:kwargs:{sorted(kwargs.items())}"
     
     # Hash it to create a fixed-length key
     return hashlib.md5(key_data.encode()).hexdigest()
