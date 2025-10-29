@@ -1,157 +1,148 @@
-# Real-Time Public Transport Data Pipeline
-
+# Real-Time Public Transport Data Pipeline - Berlin Transport App
 ---
-
 ## Purpose
-
-The purpose of this project is to build a modern, production-grade real-time data pipeline that extracts, stores, transforms, and visualizes live public transport data from Berlin’s BVG system using the [v6.bvg.transport.rest](https://v6.bvg.transport.rest) API. The pipeline is designed to be modular, cloud-portable (AWS-ready), and suitable for a data engineering portfolio.
-
+The purpose of this project is to build a modern, production-grade real-time data pipeline that extracts, stores, transforms, and visualizes live public transport data from Berlin's BVG system using the v6.bvg.transport.rest API. The pipeline is designed to be modular, cloud-portable (AWS-ready), and suitable for a data engineering portfolio.
 ---
-
 ## Scope
+This project covers the end-to-end lifecycle of a real-time data pipeline:
 
-This project covers the **end-to-end lifecycle** of a real-time data pipeline:
 - API data extraction
-- Ingestion
-- Loading
-- Transformation
-- Map visualization
+- Ingestion & caching
+- Loading & transformation
+- Real-time visualization
+- Interactive map with live vehicle tracking
 
----
+## Features
 
-## Tech stack
+### Core Functionality
+-  **Station Search**: Real-time station search with autocomplete (min. 2 characters)
+- **Live Departures**: Real-time departure information with delay indicators
+- **Interactive Map**: Leaflet-based map centered on Berlin
+- **Vehicle Radar**: Live tracking of buses, trains, and trams (NEW!)
+- **Favorites System**: Save frequently used stations with LocalStorage persistence
+- **Dark Mode**: Toggle between light and dark themes
+- **Search History**: Quick access to recent searches
+- **Performance Optimization**: In-memory cache with 55-95% latency reduction
 
-- **Backend Framework**: FastAPI
-- **Python Version**: 3.12
+## Tech Stack
+
+### Backend
+- **Framework**: FastAPI (Python 3.11)
 - **HTTP Client**: requests (sync)
-- **Caching**: Redis 7 (with in-memory fallback)
+- **Caching**: Custom in-memory cache with TTL
 - **Data Validation**: Pydantic
 - **Template Engine**: Jinja2
-- **Frontend**: Vanilla JS + Leaflet
-- **Container**: Docker + Docker Compose
-- **Testing**: pytest + pytest-asyncio
+- **Server**: Uvicorn with hot-reload
 
+### Frontend
+- **UI Framework**: Bootstrap 5.3.0
+- **Map Library**: Leaflet 1.9.4
+- **Icons**: Font Awesome 6.4.0
+- **JavaScript**: Vanilla ES6+
+
+### Testing & DevOps
+- **Testing**: pytest, pytest-cov, pytest-asyncio
+- **Linting**: Black, Flake8, isort, ESLint
+- **CI/CD**: GitHub Actions
+- **Container**: Docker + Docker Compose
+
+## Architecture
 
 ### Layered Architecture
-
-```
 ┌─────────────────────────────────┐
-│     Presentation Layer          │
-│  (Templates, Static Files, API) │
+│ Presentation Layer │
+│ (Templates, Static Files, API) │
 ├─────────────────────────────────┤
-│     Application Layer           │
-│    (API Routes, Controllers)    │
+│ Application Layer │
+│ (API Routes, Controllers) │
 ├─────────────────────────────────┤
-│     Business Logic Layer        │
-│  (Services: BVG Client, Cache)  │
+│ Business Logic Layer │
+│ (Services: BVG Client, Cache) │
 ├─────────────────────────────────┤
-│     Data Access Layer           │
-│   (Models, External APIs)       │
+│ Data Access Layer │
+│ (Models, External APIs) │
 └─────────────────────────────────┘
-```
----
 
-## Repo Structure
-
-```bash
+### Repo Structure
 berlin-transportation-app/
-├── backend/                  # FastAPI backend application
-│   ├── app/
-│   │   ├── api/             # API endpoints
-│   │   ├── models/          # Pydantic models
-│   │   ├── services/        # Business logic (BVG client)
-│   │   ├── utils/           # Utilities (cache)
-│   │   ├── static/          # Static files (CSS, JS)
-│   │   ├── templates/       # HTML templates
-│   │   └── main.py          # Application entry point
-│   ├── tests/               # Pytest tests
-│   └── requirements.txt     # Python dependencies
-├── frontend/                # Frontend files
-│   ├── css/                 # Stylesheets
-│   ├── js/                  # JavaScript
-│   └── index.html           # Main HTML
-├── docker/                  # Docker configurations
-│   ├── Dockerfile.backend
-│   └── Dockerfile.frontend
-├── .github/                 # CI/CD workflows
-│   └── workflows/
-├── docker-compose.yml       # Docker orchestration
-├── start.sh                 # Single-command startup script
-├── test_latency.py          # Latency testing
-├── test_cache_performance.py # Cache performance testing
-└── README.md                # This file
-```
+├── backend/ # FastAPI backend application
+│ ├── app/
+│ │ ├── api/ # API endpoints
+│ │ │ ├── departures.py
+│ │ │ ├── stations.py
+│ │ │ └── radar.py # NEW: Vehicle radar endpoint
+│ │ ├── models/ # Pydantic models
+│ │ │ └── transport.py
+│ │ ├── services/ # Business logic
+│ │ │ └── bvg_client.py
+│ │ ├── utils/ # Utilities
+│ │ │ ├── cache.py # In-memory cache with TTL
+│ │ │ └── __init__.py
+│ │ ├── static/ # Static files
+│ │ │ ├── css/
+│ │ │ └── js/
+│ │ ├── templates/ # HTML templates
+│ │ │ └── index.html
+│ │ └── main.py # Application entry point
+│ ├── tests/ # Pytest tests (27/27 passing)
+│ │ ├── conftest.py # Shared fixtures
+│ │ ├── test_api_endpoints.py
+│ │ ├── test_bvg_client.py
+│ │ └── test_cache.py
+│ ├── requirements.txt # Python dependencies
+│ ├── requirements-dev.txt # Development dependencies
+│ └── setup.cfg # Test configuration
+├── frontend/ # Frontend files
+│ ├── css/
+│ │ └── styles.css
+│ ├── js/
+│ │ └── app.js # 1000+ lines of JavaScript
+│ └── index.html
+├── .github/ # CI/CD workflows
+│ └── workflows/
+│ └── ci.yml # 4 jobs: lint & test
+├── docs/ # Documentation
+│ ├── API_REVIEW_REPORT.md
+│ ├── DEPLOYMENT_OPTIONS.md
+│ ├── FRONTEND_VALIDATION.md
+│ ├── GITHUB_ISSUES_PLAN.md
+│ ├── PROGRESS_SUMMARY.md
+│ └── PROJECT_UPDATE.md
+├── docker-compose.yml # Docker orchestration
+├── FEATURES.md # Feature documentation
+├── PRD.md # Product requirements
+├── TASK_PLAN.md # Task planning
+└── README.md # This file
 
-## How to run
+## How to Run
 
 ### Quick Start (Recommended)
 
-Start both frontend and backend with one command:
+### 1. Clone the Repository 
+/```bash
+git clone https://github.com/Rosvend/berlin-transportation-app.git
+cd berlin-transportation-app
+git checkout pr-15-frontend
 
-```bash
-./start.sh
-```
+### 2. Install Backend Dependencies
+cd backend
+pip install -r requirements.txt
+pip install -r requirements-dev.txt  # For testing
 
-This script will:
-- Check/create `.env` file
-- Start Redis container (if Docker is available)
-- Activate virtual environment
-- Install dependencies
-- Run all tests
-- Launch backend API (http://localhost:8000)
-- Launch frontend server (http://localhost:3000)
+### 3. Start Backend (Terminal 1)
+cd backend
+python -m uvicorn app.main:app --reload --port 8000
 
-Access the app at: **http://localhost:3000**
+### 4. Start Frontend (Terminal 2)
+cd frontend
+python -m http.server 3001
 
-### Alternative: Using Docker Compose
-
-```bash
-# Start all services (frontend, backend, redis)
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
-```
-
-## Access Points
-
-Once running, access:
-
-- **Main Application**: http://localhost:3000 (Frontend + Backend)
-- **API Documentation**: http://localhost:8000/docs
-- **API Alternative Docs**: http://localhost:8000/redoc
-- **Health Check**: http://localhost:8000/api/health
+### 5. Access the Application
+Main Application: http://localhost:3001
+API Documentation: http://localhost:8000/docs
+Health Check: http://localhost:8000/health
 
 ## Testing
-
-### Run All Tests
-
-```bash
 cd backend
-source ../venv/bin/activate  # On Windows: venv\Scripts\activate
 python -m pytest tests/ -v
-```
 
-### Test Latency
-
-To verify the application meets latency requirements (< 1 second):
-
-```bash
-# In a separate terminal, while the app is running
-python test_latency.py
-```
-
-This will test various endpoints and report average response times.
-
-### Redis Integration
-
-The application supports Redis caching for improved performance:
-- If Redis is available (via Docker): Automatic connection with persistent cache
-- If Redis is not available: Fallback to in-memory cache
-
-Check cache status:
-```bash
-curl http://localhost:8000/api/cache/stats
