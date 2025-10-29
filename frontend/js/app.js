@@ -2,6 +2,9 @@
 const API_URL = 'http://localhost:8000/api';
 let map = null;
 let markers = [];
+let vehicleMarkers = [];
+let radarUpdateInterval = null;
+let isRadarActive = false;
 
 // Funciones para manejar favoritos
 function getFavorites() {
@@ -958,6 +961,167 @@ document.getElementById('center-map-btn').addEventListener('click', () => {
 
 // Initialize favorites count
 updateFavoritesCount();
+
+// ==================== RADAR DE VEHÍCULOS EN TIEMPO REAL ====================
+
+// Colores por tipo de transporte
+const VEHICLE_COLORS = {
+    'bus': '#DC3545',        // Rojo
+    'tram': '#28A745',       // Verde
+    'subway': '#007BFF',     // Azul
+    'suburban': '#FFC107',   // Amarillo
+    'regional': '#6C757D',   // Gris
+    'express': '#6F42C1'     // Púrpura
+};
+
+// Obtener color según el tipo de línea
+function getVehicleColor(lineType) {
+    return VEHICLE_COLORS[lineType] || '#6C757D';
+}
+
+// Crear icono personalizado para vehículos
+function createVehicleIcon(line) {
+    const color = getVehicleColor(line.product || line.type);
+    const lineName = line.name || '?';
+    
+    return L.divIcon({
+        className: 'vehicle-marker',
+        html: `<div style="background-color: ${color}; color: white; padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); white-space: nowrap;">
+            ${lineName}
+        </div>`,
+        iconSize: [null, null],
+        iconAnchor: [20, 15]
+    });
+}
+
+// Limpiar marcadores de vehículos del mapa
+function clearVehicleMarkers() {
+    vehicleMarkers.forEach(marker => map.removeLayer(marker));
+    vehicleMarkers = [];
+}
+
+// Obtener y mostrar vehículos en el radar
+async function updateVehicleRadar() {
+    try {
+        // Obtener límites del mapa visible
+        const bounds = map.getBounds();
+        const north = bounds.getNorth();
+        const south = bounds.getSouth();
+        const west = bounds.getWest();
+        const east = bounds.getEast();
+        
+        // Llamar al API
+        const response = await fetch(
+            `${API_URL}/radar/vehicles?north=${north}&south=${south}&west=${west}&east=${east}&duration=30&results=100`
+        );
+        
+        if (!response.ok) {
+            console.error('Error fetching radar data:', response.status);
+            return;
+        }
+        
+        const data = await response.json();
+        
+        // Limpiar marcadores anteriores
+        clearVehicleMarkers();
+        
+        // Agregar nuevos marcadores
+        if (data.vehicles && data.vehicles.length > 0) {
+            data.vehicles.forEach(vehicle => {
+                if (vehicle.location && vehicle.location.latitude && vehicle.location.longitude) {
+                    const marker = L.marker(
+                        [vehicle.location.latitude, vehicle.location.longitude],
+                        { icon: createVehicleIcon(vehicle.line) }
+                    );
+                    
+                    // Popup con información del vehículo
+                    let popupContent = `
+                        <div style="min-width: 200px;">
+                            <h6 style="margin: 0 0 8px 0; color: ${getVehicleColor(vehicle.line.product || vehicle.line.type)};">
+                                <strong>${vehicle.line.name || 'Vehículo'}</strong>
+                            </h6>
+                            <p style="margin: 4px 0;"><strong>Tipo:</strong> ${vehicle.line.product || vehicle.line.type || 'N/A'}</p>
+                            ${vehicle.direction ? `<p style="margin: 4px 0;"><strong>Dirección:</strong> ${vehicle.direction}</p>` : ''}
+                    `;
+                    
+                    if (vehicle.nextStopovers && vehicle.nextStopovers.length > 0) {
+                        popupContent += '<p style="margin: 8px 0 4px 0;"><strong>Próximas paradas:</strong></p><ul style="margin: 0; padding-left: 20px;">';
+                        vehicle.nextStopovers.slice(0, 3).forEach(stop => {
+                            if (stop.stop && stop.stop.name) {
+                                popupContent += `<li style="font-size: 12px;">${stop.stop.name}</li>`;
+                            }
+                        });
+                        popupContent += '</ul>';
+                    }
+                    
+                    popupContent += '</div>';
+                    
+                    marker.bindPopup(popupContent);
+                    marker.addTo(map);
+                    vehicleMarkers.push(marker);
+                }
+            });
+            
+            console.log(`Radar actualizado: ${data.vehicles.length} vehículos en el mapa`);
+        }
+        
+    } catch (error) {
+        console.error('Error updating vehicle radar:', error);
+    }
+}
+
+// Activar/Desactivar radar
+function toggleRadar() {
+    isRadarActive = !isRadarActive;
+    
+    const radarBtn = document.getElementById('toggle-radar-btn');
+    
+    if (isRadarActive) {
+        radarBtn.classList.remove('btn-outline-info');
+        radarBtn.classList.add('btn-info');
+        radarBtn.innerHTML = '<i class="fas fa-broadcast-tower"></i> Radar ON';
+        
+        // Actualizar inmediatamente
+        updateVehicleRadar();
+        
+        // Actualizar cada 15 segundos
+        radarUpdateInterval = setInterval(updateVehicleRadar, 15000);
+        
+        showNotification('Radar de vehículos activado', 'success');
+    } else {
+        radarBtn.classList.remove('btn-info');
+        radarBtn.classList.add('btn-outline-info');
+        radarBtn.innerHTML = '<i class="fas fa-broadcast-tower"></i> Radar OFF';
+        
+        // Detener actualizaciones
+        if (radarUpdateInterval) {
+            clearInterval(radarUpdateInterval);
+            radarUpdateInterval = null;
+        }
+        
+        // Limpiar vehículos del mapa
+        clearVehicleMarkers();
+        
+        showNotification('Radar de vehículos desactivado', 'info');
+    }
+}
+
+// Función para mostrar notificaciones
+function showNotification(message, type = 'info') {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 250px;';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    // Auto-cerrar después de 3 segundos
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 3000);
+}
 
 // Load dark mode preference
 loadThemePreference();

@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 
 # Import your API routers
-from app.api import stations, departures
+from app.api import stations, departures, radar
 from app.utils import get_cache_stats, clear_cache, cleanup_cache
 
 # Create FastAPI instance
@@ -35,6 +35,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 # Include API routers
 app.include_router(stations.router, prefix="/api", tags=["stations"])
 app.include_router(departures.router, prefix="/api", tags=["departures"])
+app.include_router(radar.router, prefix="/api", tags=["radar"])
 
 # Web routes (HTML pages)
 @app.get("/", response_class=HTMLResponse)
