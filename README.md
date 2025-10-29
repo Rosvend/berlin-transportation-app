@@ -49,70 +49,74 @@ This project covers the end-to-end lifecycle of a real-time data pipeline:
 ## Architecture
 
 ### Layered Architecture
+```text
 ┌─────────────────────────────────┐
-│ Presentation Layer │
-│ (Templates, Static Files, API) │
+│ Presentation Layer              │
+│ (Templates, Static Files, API)  │
 ├─────────────────────────────────┤
-│ Application Layer │
-│ (API Routes, Controllers) │
+│ Application Layer               │
+│ (API Routes, Controllers)       │
 ├─────────────────────────────────┤
-│ Business Logic Layer │
-│ (Services: BVG Client, Cache) │
+│ Business Logic Layer            │
+│ (Services: BVG Client, Cache)   │
 ├─────────────────────────────────┤
-│ Data Access Layer │
-│ (Models, External APIs) │
+│ Data Access Layer               │
+│ (Models, External APIs)         │
 └─────────────────────────────────┘
-
+```
 ### Repo Structure
+
+```text
 berlin-transportation-app/
 ├── backend/ # FastAPI backend application
-│ ├── app/
-│ │ ├── api/ # API endpoints
-│ │ │ ├── departures.py
-│ │ │ ├── stations.py
-│ │ │ └── radar.py # NEW: Vehicle radar endpoint
-│ │ ├── models/ # Pydantic models
-│ │ │ └── transport.py
-│ │ ├── services/ # Business logic
-│ │ │ └── bvg_client.py
-│ │ ├── utils/ # Utilities
-│ │ │ ├── cache.py # In-memory cache with TTL
-│ │ │ └── __init__.py
-│ │ ├── static/ # Static files
-│ │ │ ├── css/
-│ │ │ └── js/
-│ │ ├── templates/ # HTML templates
-│ │ │ └── index.html
-│ │ └── main.py # Application entry point
-│ ├── tests/ # Pytest tests (27/27 passing)
-│ │ ├── conftest.py # Shared fixtures
-│ │ ├── test_api_endpoints.py
-│ │ ├── test_bvg_client.py
-│ │ └── test_cache.py
-│ ├── requirements.txt # Python dependencies
-│ ├── requirements-dev.txt # Development dependencies
-│ └── setup.cfg # Test configuration
+│   ├── app/
+│   │   ├── api/ # API endpoints
+│   │   │   ├── departures.py
+│   │   │   ├── stations.py
+│   │   │   └── radar.py # NEW: Vehicle radar endpoint
+│   │   ├── models/ # Pydantic models
+│   │   │   └── transport.py
+│   │   ├── services/ # Business logic
+│   │   │   └── bvg_client.py
+│   │   ├── utils/ # Utilities
+│   │   │   ├── cache.py # In-memory cache with TTL
+│   │   │   └── __init__.py
+│   │   ├── static/ # Static files
+│   │   │   ├── css/
+│   │   │   └── js/
+│   │   ├── templates/ # HTML templates
+│   │   │   └── index.html
+│   │   └── main.py # Application entry point
+│   ├── tests/ # Pytest tests (27/27 passing)
+│   │   ├── conftest.py # Shared fixtures
+│   │   ├── test_api_endpoints.py
+│   │   ├── test_bvg_client.py
+│   │   └── test_cache.py
+│   ├── requirements.txt # Python dependencies
+│   ├── requirements-dev.txt # Development dependencies
+│   └── setup.cfg # Test configuration
 ├── frontend/ # Frontend files
-│ ├── css/
-│ │ └── styles.css
-│ ├── js/
-│ │ └── app.js # 1000+ lines of JavaScript
-│ └── index.html
+│   ├── css/
+│   │   └── styles.css
+│   ├── js/
+│   │   └── app.js # 1000+ lines of JavaScript
+│   └── index.html
 ├── .github/ # CI/CD workflows
-│ └── workflows/
-│ └── ci.yml # 4 jobs: lint & test
+│   └── workflows/
+│       └── ci.yml # 4 jobs: lint & test
 ├── docs/ # Documentation
-│ ├── API_REVIEW_REPORT.md
-│ ├── DEPLOYMENT_OPTIONS.md
-│ ├── FRONTEND_VALIDATION.md
-│ ├── GITHUB_ISSUES_PLAN.md
-│ ├── PROGRESS_SUMMARY.md
-│ └── PROJECT_UPDATE.md
+│   ├── API_REVIEW_REPORT.md
+│   ├── DEPLOYMENT_OPTIONS.md
+│   ├── FRONTEND_VALIDATION.md
+│   ├── GITHUB_ISSUES_PLAN.md
+│   ├── PROGRESS_SUMMARY.md
+│   └── PROJECT_UPDATE.md
 ├── docker-compose.yml # Docker orchestration
 ├── FEATURES.md # Feature documentation
 ├── PRD.md # Product requirements
 ├── TASK_PLAN.md # Task planning
-└── README.md # This file
+└── README.md # This file lo mismo con esto
+```
 
 ## How to Run
 
