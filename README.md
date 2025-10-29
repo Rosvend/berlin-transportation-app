@@ -123,30 +123,37 @@ berlin-transportation-app/
 ### Quick Start (Recommended)
 
 ### 1. Clone the Repository 
-/```bash
+```text
+```bash
 git clone https://github.com/Rosvend/berlin-transportation-app.git
 cd berlin-transportation-app
 git checkout pr-15-frontend
-
+```
 ### 2. Install Backend Dependencies
+```text
 cd backend
 pip install -r requirements.txt
 pip install -r requirements-dev.txt  # For testing
-
+```
 ### 3. Start Backend (Terminal 1)
+```text
 cd backend
 python -m uvicorn app.main:app --reload --port 8000
-
+```
 ### 4. Start Frontend (Terminal 2)
+```text
 cd frontend
 python -m http.server 3001
-
+```
 ### 5. Access the Application
+```text
 Main Application: http://localhost:3001
 API Documentation: http://localhost:8000/docs
 Health Check: http://localhost:8000/health
-
+```
 ## Testing
+```text
 cd backend
 python -m pytest tests/ -v
+```
 
