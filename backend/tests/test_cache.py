@@ -5,6 +5,13 @@ import pytest
 import time
 from app.utils.cache import cached, clear_cache, get_cache_stats, cleanup_cache
 
+@pytest.fixture(autouse=True)
+def reset_cache():
+    """Reset cache before each test"""
+    clear_cache()
+    yield
+    clear_cache()
+
 def test_cache_decorator():
     """Test that cache decorator works"""
     call_count = 0
@@ -64,13 +71,13 @@ def test_clear_cache():
     cached_function(2)
     
     stats_before = get_cache_stats()
-    assert stats_before["size"] > 0
+    assert stats_before["memory_size"] > 0 or (stats_before.get("redis_keys", 0) > 0)
     
     # Clear cache
     clear_cache()
     
     stats_after = get_cache_stats()
-    assert stats_after["size"] == 0
+    assert stats_after["memory_size"] == 0
 
 def test_cache_stats():
     """Test cache statistics"""
@@ -90,6 +97,7 @@ def test_cache_stats():
     assert stats["hits"] >= 2
     assert stats["misses"] >= 2
     assert "hit_rate" in stats
+    assert "using_redis" in stats
 
 def test_cleanup_expired():
     """Test cleanup of expired entries"""

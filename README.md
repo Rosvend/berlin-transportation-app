@@ -23,15 +23,14 @@ This project covers the **end-to-end lifecycle** of a real-time data pipeline:
 
 ## Tech stack
 
-- **Backend Framework**: FastAPI 0.104
+- **Backend Framework**: FastAPI
 - **Python Version**: 3.12
-- **HTTP Client**: httpx (async)
-- **Caching**: Redis 7
-- **Data Validation**: Pydantic 2.0
+- **HTTP Client**: requests (sync)
+- **Caching**: Redis 7 (with in-memory fallback)
+- **Data Validation**: Pydantic
 - **Template Engine**: Jinja2
 - **Frontend**: Vanilla JS + Leaflet
 - **Container**: Docker + Docker Compose
-- **Package Manager**: UV / pip
 - **Testing**: pytest + pytest-asyncio
 
 
@@ -57,103 +56,104 @@ This project covers the **end-to-end lifecycle** of a real-time data pipeline:
 ## Repo Structure
 
 ```bash
-berlin-transport-pipeline/
-├── airflow/                  # Airflow DAGs and configurations
-│   ├── dags/
-│   │   ├── __init__.py
-│   │   └── ingest_departure.py
-│   └── .gitkeep
-├── config/                   # Configuration files
-│   └── config.yaml
-├── docker/                   # Dockerfiles and initialization scripts
-│   ├── dockerfile.airflow
-│   └── init-airflow.sh
-├── etl/
-│   ├── extract/
-│   │   ├── __init__.py           # API data fetch logic
-│   ├── __init__.py
-│   ├── departures.py
-│   └── utils.py
-├── scripts/                  # Manual tests, utilities
-│   ├── bucket_creation.sh
-│   └── setup.sh
-├── tests/                    # Pytest unit + integration tests
-│   ├── __init__.py
-│   └── test_departures.py
-├── transform/                # Transformation logic
-├── docker-compose.yml        # Orchestration of local stack
-├── makefile                  # Makefile for convenience commands
-├── requirements-streamlit.txt
-├── requirements.txt
-├── .env                      # Secrets + credentials
-├── README.md                 # Project documentation
-├── .gitignore                # Git ignore file
+berlin-transportation-app/
+├── backend/                  # FastAPI backend application
+│   ├── app/
+│   │   ├── api/             # API endpoints
+│   │   ├── models/          # Pydantic models
+│   │   ├── services/        # Business logic (BVG client)
+│   │   ├── utils/           # Utilities (cache)
+│   │   ├── static/          # Static files (CSS, JS)
+│   │   ├── templates/       # HTML templates
+│   │   └── main.py          # Application entry point
+│   ├── tests/               # Pytest tests
+│   └── requirements.txt     # Python dependencies
+├── frontend/                # Frontend files
+│   ├── css/                 # Stylesheets
+│   ├── js/                  # JavaScript
+│   └── index.html           # Main HTML
+├── docker/                  # Docker configurations
+│   ├── Dockerfile.backend
+│   └── Dockerfile.frontend
+├── .github/                 # CI/CD workflows
+│   └── workflows/
+├── docker-compose.yml       # Docker orchestration
+├── start.sh                 # Single-command startup script
+├── test_latency.py          # Latency testing
+├── test_cache_performance.py # Cache performance testing
+└── README.md                # This file
 ```
 
 ## How to run
 
-### For Windows
+### Quick Start (Recommended)
 
-### Option 1: Using the Startup Script (Recommended)
+Start both frontend and backend with one command:
 
 ```bash
-# Make sure you're in the project root
-cd berlin-transportation-app
-
-# Run the dev startup script
-./start-dev.sh
+./start.sh
 ```
 
-This will:
+This script will:
 - Check/create `.env` file
-- Start Redis if needed
+- Start Redis container (if Docker is available)
+- Activate virtual environment
 - Install dependencies
-- Launch the FastAPI application
+- Run all tests
+- Launch backend API (http://localhost:8000)
+- Launch frontend server (http://localhost:3000)
 
-### Option 2: Using Docker Compose
+Access the app at: **http://localhost:3000**
+
+### Alternative: Using Docker Compose
 
 ```bash
-# Start backend and Redis
-docker-compose up -d backend redis
+# Start all services (frontend, backend, redis)
+docker-compose up -d
 
 # View logs
-docker-compose logs -f backend
+docker-compose logs -f
 
 # Stop services
 docker-compose down
 ```
 
-### Option 3: Manual Setup
-
-```bash
-# 1. Create .env file
-cp .env.example .env
-
-# 2. Start Redis
-docker-compose up -d redis
-# OR use local Redis:
-# redis-server
-
-# 3. Install dependencies
-pip install -r pyproject.toml
-
-# 4. Run application
-cd backend
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-### For Linux/Mac
-```bash
-
-# Run the makefile script
-make up
-```
-
-## 🌐 Access Points
+## Access Points
 
 Once running, access:
 
-- **Web UI**: http://localhost:8000
+- **Main Application**: http://localhost:3000 (Frontend + Backend)
 - **API Documentation**: http://localhost:8000/docs
 - **API Alternative Docs**: http://localhost:8000/redoc
 - **Health Check**: http://localhost:8000/api/health
+
+## Testing
+
+### Run All Tests
+
+```bash
+cd backend
+source ../venv/bin/activate  # On Windows: venv\Scripts\activate
+python -m pytest tests/ -v
+```
+
+### Test Latency
+
+To verify the application meets latency requirements (< 1 second):
+
+```bash
+# In a separate terminal, while the app is running
+python test_latency.py
+```
+
+This will test various endpoints and report average response times.
+
+### Redis Integration
+
+The application supports Redis caching for improved performance:
+- If Redis is available (via Docker): Automatic connection with persistent cache
+- If Redis is not available: Fallback to in-memory cache
+
+Check cache status:
+```bash
+curl http://localhost:8000/api/cache/stats

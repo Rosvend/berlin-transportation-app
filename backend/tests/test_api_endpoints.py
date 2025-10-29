@@ -18,7 +18,7 @@ def test_cache_stats_endpoint(client):
     assert response.status_code == 200
     data = response.json()
     assert "cache" in data
-    assert "size" in data["cache"]
+    assert "memory_size" in data["cache"]
     assert "hits" in data["cache"]
     assert "misses" in data["cache"]
 

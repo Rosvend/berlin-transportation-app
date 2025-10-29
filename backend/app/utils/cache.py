@@ -1,5 +1,5 @@
 """
-Simple in-memory cache for API responses
+Simple cache for API responses with Redis fallback
 Reduces latency for repeated queries
 """
 from datetime import datetime, timedelta
@@ -8,57 +8,142 @@ from functools import wraps
 import hashlib
 import json
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
+# Try to import Redis, fall back to in-memory if not available
+try:
+    import redis
+    REDIS_AVAILABLE = True
+except ImportError:
+    REDIS_AVAILABLE = False
+    logger.warning("Redis not available, using in-memory cache")
+
 class SimpleCache:
-    """In-memory cache with TTL support"""
+    """Cache with Redis support and in-memory fallback"""
     
     def __init__(self):
         self._cache = {}
         self._hits = 0
         self._misses = 0
+        self._redis_client = None
+        self._use_redis = False
+        
+        # Try to connect to Redis
+        if REDIS_AVAILABLE:
+            try:
+                redis_host = os.getenv("REDIS_HOST", "localhost")
+                redis_port = int(os.getenv("REDIS_PORT", "6379"))
+                redis_db = int(os.getenv("REDIS_DB", "0"))
+                
+                self._redis_client = redis.Redis(
+                    host=redis_host,
+                    port=redis_port,
+                    db=redis_db,
+                    decode_responses=True,
+                    socket_connect_timeout=2
+                )
+                # Test connection
+                self._redis_client.ping()
+                self._use_redis = True
+                logger.info(f"Redis cache connected at {redis_host}:{redis_port}")
+            except Exception as e:
+                logger.warning(f"Failed to connect to Redis: {e}. Using in-memory cache.")
+                self._redis_client = None
+                self._use_redis = False
     
     def get(self, key: str) -> Optional[Any]:
         """Get value from cache if not expired"""
+        # Try Redis first if available
+        if self._use_redis and self._redis_client:
+            try:
+                value = self._redis_client.get(key)
+                if value:
+                    self._hits += 1
+                    logger.debug(f"Redis cache HIT for key: {key[:50]}...")
+                    return json.loads(value)
+                else:
+                    self._misses += 1
+                    logger.debug(f"Redis cache MISS for key: {key[:50]}...")
+                    return None
+            except Exception as e:
+                logger.warning(f"Redis error on GET, falling back to memory: {e}")
+                # Fall through to in-memory cache
+        
+        # In-memory cache
         if key in self._cache:
             data, expiry = self._cache[key]
             if datetime.now() < expiry:
                 self._hits += 1
-                logger.debug(f"Cache HIT for key: {key[:50]}...")
+                logger.debug(f"Memory cache HIT for key: {key[:50]}...")
                 return data
             else:
                 # Expired, remove it
                 del self._cache[key]
-                logger.debug(f"Cache EXPIRED for key: {key[:50]}...")
+                logger.debug(f"Memory cache EXPIRED for key: {key[:50]}...")
         
         self._misses += 1
-        logger.debug(f"Cache MISS for key: {key[:50]}...")
+        logger.debug(f"Memory cache MISS for key: {key[:50]}...")
         return None
     
     def set(self, key: str, value: Any, ttl_seconds: int = 300):
         """Set value in cache with TTL"""
+        # Try Redis first if available
+        if self._use_redis and self._redis_client:
+            try:
+                serialized = json.dumps(value, default=str)
+                self._redis_client.setex(key, ttl_seconds, serialized)
+                logger.debug(f"Redis cache SET for key: {key[:50]}... (TTL: {ttl_seconds}s)")
+                return
+            except Exception as e:
+                logger.warning(f"Redis error on SET, falling back to memory: {e}")
+                # Fall through to in-memory cache
+        
+        # In-memory cache
         expiry = datetime.now() + timedelta(seconds=ttl_seconds)
         self._cache[key] = (value, expiry)
-        logger.debug(f"Cache SET for key: {key[:50]}... (TTL: {ttl_seconds}s)")
+        logger.debug(f"Memory cache SET for key: {key[:50]}... (TTL: {ttl_seconds}s)")
     
     def clear(self):
         """Clear all cache"""
+        # Clear Redis if available
+        if self._use_redis and self._redis_client:
+            try:
+                self._redis_client.flushdb()
+                logger.info("Redis cache cleared")
+            except Exception as e:
+                logger.warning(f"Failed to clear Redis cache: {e}")
+        
+        # Clear in-memory cache
         count = len(self._cache)
         self._cache.clear()
-        logger.info(f"Cache cleared ({count} items removed)")
+        logger.info(f"Memory cache cleared ({count} items removed)")
     
     def get_stats(self) -> dict:
         """Get cache statistics"""
         total = self._hits + self._misses
         hit_rate = (self._hits / total * 100) if total > 0 else 0
         
-        return {
-            "size": len(self._cache),
+        stats = {
+            "memory_size": len(self._cache),
             "hits": self._hits,
             "misses": self._misses,
-            "hit_rate": f"{hit_rate:.2f}%"
+            "hit_rate": f"{hit_rate:.2f}%",
+            "using_redis": self._use_redis
         }
+        
+        # Add Redis info if available
+        if self._use_redis and self._redis_client:
+            try:
+                info = self._redis_client.info("stats")
+                stats["redis_keys"] = self._redis_client.dbsize()
+                stats["redis_hits"] = info.get("keyspace_hits", 0)
+                stats["redis_misses"] = info.get("keyspace_misses", 0)
+            except Exception as e:
+                logger.warning(f"Failed to get Redis stats: {e}")
+        
+        return stats
     
     def cleanup_expired(self):
         """Remove all expired entries"""

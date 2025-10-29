@@ -4,10 +4,12 @@ Tests for BVG Client
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 from app.services.bvg_client import BVGClient
+from app.utils.cache import clear_cache
 
 @pytest.fixture
 def bvg_client():
     """Create a BVG client instance"""
+    clear_cache()  # Clear cache before each test
     return BVGClient()
 
 def test_bvg_client_initialization(bvg_client):
