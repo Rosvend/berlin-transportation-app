@@ -36,10 +36,10 @@ def test_cache_cleanup_endpoint(client):
     data = response.json()
     assert "message" in data
 
-@patch('app.services.bvg_client.bvg_client.search_stations')
-def test_search_stations_success(mock_search, client, mock_bvg_stations_response):
+@patch('app.services.bvg_client._bvg_client')
+def test_search_stations_success(mock_client, client, mock_bvg_stations_response):
     """Test station search with successful response"""
-    mock_search.return_value = mock_bvg_stations_response
+    mock_client.search_stations.return_value = mock_bvg_stations_response
     
     response = client.get("/api/stations/search?q=Alexander&limit=10")
     assert response.status_code == 200
@@ -47,18 +47,18 @@ def test_search_stations_success(mock_search, client, mock_bvg_stations_response
     assert "stations" in data
     assert len(data["stations"]) > 0
 
-@patch('app.services.bvg_client.bvg_client.search_stations')
-def test_search_stations_invalid_query(mock_search, client):
+@patch('app.services.bvg_client._bvg_client')
+def test_search_stations_invalid_query(mock_client, client):
     """Test station search with invalid query (too short)"""
     response = client.get("/api/stations/search?q=A&limit=10")
-    assert response.status_code == 400
+    assert response.status_code == 422  # FastAPI returns 422 for validation errors
     data = response.json()
     assert "detail" in data
 
-@patch('app.services.bvg_client.bvg_client.search_stations')
-def test_search_stations_api_unavailable(mock_search, client):
+@patch('app.services.bvg_client._bvg_client')
+def test_search_stations_api_unavailable(mock_client, client):
     """Test station search when BVG API is unavailable"""
-    mock_search.return_value = None
+    mock_client.search_stations.return_value = None
     
     response = client.get("/api/stations/search?q=Berlin&limit=10")
     assert response.status_code == 503
@@ -81,10 +81,10 @@ def test_get_featured_stations(client):
     assert "stations" in data
     assert len(data["stations"]) > 0
 
-@patch('app.services.bvg_client.bvg_client.get_departures')
-def test_get_departures_success(mock_departures, client, mock_bvg_departures_response):
+@patch('app.services.bvg_client._bvg_client')
+def test_get_departures_success(mock_client, client, mock_bvg_departures_response):
     """Test get departures with successful response"""
-    mock_departures.return_value = mock_bvg_departures_response
+    mock_client.get_departures.return_value = mock_bvg_departures_response
     
     response = client.get("/api/departures/900000100003?duration=60")
     assert response.status_code == 200
@@ -93,10 +93,10 @@ def test_get_departures_success(mock_departures, client, mock_bvg_departures_res
     assert "departures" in data
     assert len(data["departures"]) > 0
 
-@patch('app.services.bvg_client.bvg_client.get_departures')
-def test_get_departures_api_unavailable(mock_departures, client):
+@patch('app.services.bvg_client._bvg_client')
+def test_get_departures_api_unavailable(mock_client, client):
     """Test get departures when BVG API is unavailable"""
-    mock_departures.return_value = None
+    mock_client.get_departures.return_value = None
     
     response = client.get("/api/departures/900000100003")
     assert response.status_code == 503

@@ -13,10 +13,14 @@ from dotenv import load_dotenv
 import time
 from app.utils.cache import cached
 
+# Load environment variables
+load_dotenv()
+
+# Configure logging
 logger = logging.getLogger(__name__)
 
 class BVGClient:
-    """Client for interacting with BVG Transport REST API"""
+    """Client for interacting with BVG Transport API"""
     
     def __init__(self):
         self.api_url = os.getenv("BVG_API_BASE_URL", "https://v6.bvg.transport.rest")
@@ -62,24 +66,44 @@ class BVGClient:
         logger.error(f"All retry attempts failed. Last error: {last_error}")
         return None
     
-    async def search_locations(
-        self, 
-        query: str, 
-        results: int = 10,
-        stops: bool = True,
-        addresses: bool = False,
-        poi: bool = False
-    ) -> List[Dict[str, Any]]:
-        """
-        Search for stops, addresses, or POIs
+    def convert_to_utc(self, timestamp_ms: Optional[int]) -> Optional[str]:
+        """Convert timestamp in milliseconds to UTC datetime string"""
+        if timestamp_ms is None:
+            return None
+        try:
+            timestamp_seconds = timestamp_ms / 1000
+            utc_datetime = datetime.fromtimestamp(timestamp_seconds, tz=pytz.UTC)
+            return utc_datetime.isoformat()
+        except Exception as e:
+            logger.warning(f"Failed to convert timestamp {timestamp_ms}: {e}")
+            return None
+    
+    def process_radar_data(self, data: Union[Dict, List]) -> Union[Dict, List]:
+        """Process radar data to convert timestamps to UTC"""
+        if isinstance(data, dict):
+            processed_data = {}
+            for key, value in data.items():
+                if key == "realtimeDataUpdatedAt":
+                    processed_data[key] = self.convert_to_utc(value)
+                elif isinstance(value, (dict, list)):
+                    processed_data[key] = self.process_radar_data(value)
+                else:
+                    processed_data[key] = value
+            return processed_data
+        elif isinstance(data, list):
+            return [self.process_radar_data(item) for item in data]
+        else:
+            return data
+    
+    def get_radar(self, north: float, south: float, west: float, east: float, 
+                  duration: int = 60, frames: int = 10, results: int = 50, 
+                  polylines: bool = True) -> Optional[Dict]:
+        """Get vehicle radar data for specified geographic area"""
+        url = (f"{self.api_url}/radar?"
+               f"north={north}&south={south}&west={west}&east={east}&"
+               f"duration={duration}&frames={frames}&results={results}&"
+               f"polylines={polylines}")
         
-        Args:
-            query: Search term (e.g., "alexanderplatz")
-            results: Maximum number of results
-            stops: Include stops/stations
-            addresses: Include addresses
-            poi: Include points of interest
-        """
         try:
             data = self._make_request(url)
             if data:
@@ -95,11 +119,6 @@ class BVGClient:
         """Search for stations by name - CACHED"""
         url = f"{self.api_url}/locations?query={query}&results={results}"
         
-        Args:
-            stop_id: Stop ID (e.g., "900100003" for Alexanderplatz)
-            duration: Show departures for how many minutes
-            results: Maximum number of results
-        """
         try:
             logger.info(f"Searching stations: {query}")
             data = self._make_request(url)
@@ -164,12 +183,13 @@ def get_bvg_client() -> BVGClient:
 def initialize_bvg_client(base_url: str = "https://v6.bvg.transport.rest") -> None:
     """Initialize the global BVG client instance"""
     global _bvg_client
-    _bvg_client = BVGClient(base_url)
+    _bvg_client = BVGClient()
 
 
 async def shutdown_bvg_client() -> None:
     """Shutdown the global BVG client instance"""
     global _bvg_client
     if _bvg_client is not None:
-        await _bvg_client.close()
+        # Close the requests session
+        _bvg_client.session.close()
         _bvg_client = None

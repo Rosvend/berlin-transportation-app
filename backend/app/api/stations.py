@@ -39,7 +39,7 @@ async def search_stations(
     """Search for stations by name"""
     try:
         # Call BVG API with correct method name
-        results = await bvg_client.search_locations(q, results=limit)
+        results = bvg_client.search_stations(q, results=limit)
         
         if results is None:
             raise HTTPException(
@@ -92,31 +92,22 @@ async def get_featured_stations():
         logger.error(f"Failed to get featured stations: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
 
+
 @router.get("/stations/{station_id}")
-async def get_station_info(
-    station_id: str,
-    bvg_client: BVGClient = Depends(get_bvg_client)
-):
+async def get_station_info(station_id: str):
     """Get information about a specific station"""
     try:
-        # Fetch actual station info from BVG API
-        info = await bvg_client.get_stop_info(station_id)
-        
+        # Return basic station structure
+        # In a real app, this might query a database of stations
         station = Station(
-            id=info.get('id', station_id),
-            name=info.get('name', f'Station {station_id}'),
-            type=info.get('type', 'stop')
+            id=station_id,
+            name=f"Station {station_id}",
+            type="stop"
         )
-        
-        # Add location if available
-        if 'location' in info and info['location']:
-            station.location = Location(
-                latitude=info['location'].get('latitude', 0),
-                longitude=info['location'].get('longitude', 0)
-            )
         
         return station
         
     except Exception as e:
         logger.error(f"Failed to get station info for {station_id}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
+

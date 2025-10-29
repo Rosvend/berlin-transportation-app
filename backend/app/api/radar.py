@@ -1,10 +1,10 @@
 """
 API endpoints for vehicle radar (real-time vehicle positions)
 """
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 import logging
 
-from app.services.bvg_client import bvg_client
+from app.services.bvg_client import get_bvg_client, BVGClient
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -16,7 +16,8 @@ async def get_vehicles_radar(
     west: float = Query(..., description="West longitude boundary"),
     east: float = Query(..., description="East longitude boundary"),
     duration: int = Query(30, ge=10, le=120, description="Duration in seconds"),
-    results: int = Query(50, ge=1, le=256, description="Maximum number of vehicles")
+    results: int = Query(50, ge=1, le=256, description="Maximum number of vehicles"),
+    client: BVGClient = Depends(get_bvg_client)
 ):
     """
     Get real-time vehicle positions (buses, trams, trains) within a geographic area.
@@ -31,7 +32,7 @@ async def get_vehicles_radar(
         logger.info(f"Getting radar data for bounds: N={north}, S={south}, W={west}, E={east}")
         
         # Call BVG API radar
-        data = bvg_client.get_radar(
+        data = client.get_radar(
             north=north,
             south=south,
             west=west,

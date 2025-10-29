@@ -4,6 +4,13 @@ Pytest configuration and fixtures
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
+from app.services.bvg_client import initialize_bvg_client
+
+@pytest.fixture(scope="session", autouse=True)
+def setup_bvg_client():
+    """Initialize BVG client for all tests"""
+    initialize_bvg_client()
+    yield
 
 @pytest.fixture
 def client():

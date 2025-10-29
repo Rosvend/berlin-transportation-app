@@ -20,7 +20,7 @@ async def get_departures(
     """Get live departures for a station"""
     try:
         # Call BVG API with correct method name
-        results = await bvg_client.get_stop_departures(station_id, duration=duration)
+        results = bvg_client.get_departures(station_id, duration=duration)
         
         if results is None:
             raise HTTPException(
