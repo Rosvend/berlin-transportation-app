@@ -115,7 +115,7 @@ berlin-transportation-app/
 ├── FEATURES.md # Feature documentation
 ├── PRD.md # Product requirements
 ├── TASK_PLAN.md # Task planning
-└── README.md # This file lo mismo con esto
+└── README.md # This file 
 ```
 
 ## How to Run
