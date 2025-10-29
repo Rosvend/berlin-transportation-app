@@ -10,10 +10,9 @@ from fastapi.responses import HTMLResponse
 from contextlib import asynccontextmanager
 import logging
 
-from app.config import get_settings
-from app.services.bvg_client import initialize_bvg_client, shutdown_bvg_client
-from app.services.cache_service import initialize_cache_service, shutdown_cache_service
-from app.api import stations, departures
+# Import your API routers
+from app.api import stations, departures, radar
+from app.utils import get_cache_stats, clear_cache, cleanup_cache
 
 # Configure logging
 settings = get_settings()
@@ -65,26 +64,23 @@ app = FastAPI(
     debug=settings.debug
 )
 
-# Configure CORS
+# Enable CORS so the frontend (served on another port) can call the API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
-    allow_credentials=settings.cors_allow_credentials,
-    allow_methods=settings.cors_allow_methods,
-    allow_headers=settings.cors_allow_headers,
+    allow_origins=["http://localhost:3001", "http://localhost:3000", "http://127.0.0.1:3001"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-# Mount static files and templates
-try:
-    app.mount("/static", StaticFiles(directory="app/static"), name="static")
-    templates = Jinja2Templates(directory="app/templates")
-except RuntimeError as e:
-    logger.warning(f"Static files/templates not mounted: {e}")
-    templates = None
+# Set up templates and static files
+templates = Jinja2Templates(directory="app/templates")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # Include API routers
 app.include_router(stations.router, prefix="/api", tags=["stations"])
 app.include_router(departures.router, prefix="/api", tags=["departures"])
+app.include_router(radar.router, prefix="/api", tags=["radar"])
 
 
 # Web routes
@@ -141,6 +137,27 @@ async def api_info():
         }
     }
 
+
+@app.get("/api/cache/stats")
+async def cache_stats():
+    """Get cache statistics"""
+    stats = get_cache_stats()
+    return {
+        "cache": stats,
+        "description": "Cache statistics for BVG API requests"
+    }
+
+@app.post("/api/cache/clear")
+async def clear_cache_endpoint():
+    """Clear all cached data"""
+    clear_cache()
+    return {"message": "Cache cleared successfully"}
+
+@app.post("/api/cache/cleanup")
+async def cleanup_cache_endpoint():
+    """Remove expired cache entries"""
+    removed = cleanup_cache()
+    return {"message": f"Removed {removed} expired entries"}
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,385 +1,54 @@
-/* Berlin Transport Live - Main Styles */
-
-:root {
-    --primary-color: #FF6B35;
-    --secondary-color: #004E89;
-    --accent-color: #1AA7EC;
-    --text-color: #2B2D42;
-    --bg-color: #F8F9FA;
-    --white: #FFFFFF;
-    --gray-light: #E9ECEF;
-    --gray: #6C757D;
-    --success: #28A745;
-    --warning: #FFC107;
-    --danger: #DC3545;
-    --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    line-height: 1.6;
-    color: var(--text-color);
-    background-color: var(--bg-color);
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-/* Header */
-header {
-    background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
-    color: var(--white);
-    padding: 2rem 0;
-    box-shadow: var(--shadow);
-}
-
-header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-}
-
-header h1 a {
-    color: var(--white);
-    text-decoration: none;
-}
-
-header h1 a:hover {
-    opacity: 0.9;
-}
-
-header .subtitle {
-    font-size: 1.1rem;
-    opacity: 0.95;
-}
-
-/* Main Content */
-main {
-    padding: 2rem 0;
-    min-height: calc(100vh - 300px);
-}
-
-section {
-    margin-bottom: 3rem;
-}
-
-h2 {
-    color: var(--secondary-color);
-    margin-bottom: 1.5rem;
-    font-size: 1.8rem;
-}
-
-/* Search Section */
-.search-section {
-    background: var(--white);
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-}
-
-.search-box {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.search-box input {
-    flex: 1;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    border: 2px solid var(--gray-light);
-    border-radius: 8px;
-    transition: border-color 0.3s;
-}
-
-.search-box input:focus {
-    outline: none;
-    border-color: var(--accent-color);
-}
-
-.search-box button {
-    padding: 0.75rem 2rem;
-    font-size: 1rem;
-    background: var(--primary-color);
-    color: var(--white);
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-.search-box button:hover {
-    background: #E65A2A;
-}
-
-.search-results {
-    margin-top: 1rem;
-}
-
-.search-result-item {
-    padding: 1rem;
-    border: 1px solid var(--gray-light);
-    border-radius: 8px;
-    margin-bottom: 0.5rem;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.search-result-item:hover {
-    background: var(--bg-color);
-    border-color: var(--accent-color);
-    transform: translateX(5px);
-}
-
-.search-result-item h3 {
-    color: var(--secondary-color);
-    margin-bottom: 0.25rem;
-}
-
-.search-result-item .station-type {
-    color: var(--gray);
-    font-size: 0.9rem;
-}
-
-/* Featured Stations */
-.station-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-}
-
-.station-card {
-    background: var(--white);
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    cursor: pointer;
-    transition: all 0.3s;
-    text-decoration: none;
-    color: var(--text-color);
-}
-
-.station-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-lg);
-}
-
-.station-card h3 {
-    color: var(--secondary-color);
-    margin-bottom: 0.5rem;
-}
-
-.station-card .badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    background: var(--accent-color);
-    color: var(--white);
-    border-radius: 20px;
-    font-size: 0.85rem;
-    margin-top: 0.5rem;
-}
-
-/* Map */
-.map-section {
-    background: var(--white);
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-}
-
-.map-container {
-    height: 500px;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-/* Departures */
-.station-info {
-    background: var(--white);
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    margin-bottom: 2rem;
-}
-
-.station-info h2 {
-    margin-bottom: 0.5rem;
-}
-
-.station-meta {
-    color: var(--gray);
-    font-size: 0.9rem;
-}
-
-.controls {
-    margin-top: 1rem;
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-}
-
-.controls select {
-    padding: 0.5rem;
-    border: 2px solid var(--gray-light);
-    border-radius: 6px;
-    font-size: 1rem;
-}
-
-.controls button {
-    padding: 0.5rem 1rem;
-    background: var(--accent-color);
-    color: var(--white);
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-.controls button:hover {
-    background: #1592D0;
-}
-
-.departures-section {
-    background: var(--white);
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-}
-
-.last-update {
-    color: var(--gray);
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-}
-
-.departures-table {
+#map-container {
+    height: 400px;
     width: 100%;
-    border-collapse: collapse;
-}
-
-.departures-table thead {
-    background: var(--bg-color);
-}
-
-.departures-table th {
-    padding: 1rem;
-    text-align: left;
-    font-weight: 600;
-    color: var(--secondary-color);
-}
-
-.departures-table td {
-    padding: 1rem;
-    border-bottom: 1px solid var(--gray-light);
-}
-
-.departures-table tr:hover {
-    background: var(--bg-color);
-}
-
-.line-badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
+    background-color: #f8f9fa;
     border-radius: 4px;
-    font-weight: bold;
-    color: var(--white);
 }
 
-.line-badge.bus { background: #A020F0; }
-.line-badge.tram { background: #DC143C; }
-.line-badge.subway { background: #0066CC; }
-.line-badge.train { background: #228B22; }
-.line-badge.ferry { background: #20B2AA; }
-
-.delay {
-    color: var(--danger);
-    font-weight: bold;
+#results-container {
+    min-height: 200px;
 }
 
-.on-time {
-    color: var(--success);
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Loading & Messages */
+#search-container {
+    min-height: 100px;
+}
+
+.navbar {
+    margin-bottom: 20px;
+}
+
+.input-group {
+    margin-top: 15px;
+}
+
+.card-title {
+    color: #0d6efd;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 10px;
+}
+
+.btn-outline-primary:hover {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.alert {
+    margin-top: 15px;
+}
+
 .loading {
     text-align: center;
-    padding: 2rem;
-    color: var(--gray);
+    padding: 20px;
+    color: #666;
 }
 
-.error {
-    background: #F8D7DA;
-    color: #721C24;
-    padding: 1rem;
-    border-radius: 8px;
-    margin: 1rem 0;
-}
-
-/* Buttons */
-.btn {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: all 0.3s;
-}
-
-.btn-secondary {
-    background: var(--gray);
-    color: var(--white);
-}
-
-.btn-secondary:hover {
-    background: #5A6268;
-}
-
-/* Footer */
-footer {
-    background: var(--text-color);
-    color: var(--white);
-    padding: 2rem 0;
-    text-align: center;
-    margin-top: 4rem;
-}
-
-footer a {
-    color: var(--accent-color);
-    text-decoration: none;
-}
-
-footer a:hover {
-    text-decoration: underline;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    header h1 {
-        font-size: 2rem;
-    }
-
-    .search-box {
-        flex-direction: column;
-    }
-
-    .station-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .departures-table {
-        font-size: 0.9rem;
-    }
-
-    .departures-table th,
-    .departures-table td {
-        padding: 0.5rem;
-    }
+#map {
+    height: 400px;
+    width: 100%;
+    border-radius: 4px;
+    z-index: 1;
 }
