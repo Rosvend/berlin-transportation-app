@@ -1,5 +1,5 @@
 // Configuración global
-const API_URL = 'http://localhost:8000/api';
+// API_URL is now defined in config.js and loaded before this script
 let map = null;
 let markers = [];
 let vehicleMarkers = [];
@@ -308,7 +308,7 @@ async function searchStation(stationName) {
             <div class="alert alert-danger">
                 <i class="fas fa-exclamation-triangle"></i> 
                 <strong>Error:</strong> ${error.message}
-                <br><small>Verifica que el backend esté corriendo en http://localhost:8000</small>
+                <br><small>Verifica que el backend esté corriendo correctamente</small>
             </div>`;
     } finally {
         // Rehabilitar botón de búsqueda

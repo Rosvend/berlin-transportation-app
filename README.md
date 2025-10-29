@@ -157,3 +157,16 @@ The application supports Redis caching for improved performance:
 Check cache status:
 ```bash
 curl http://localhost:8000/api/cache/stats
+```
+
+## Deployment
+
+For deploying to EC2 or other cloud platforms, see **[DEPLOYMENT.md](DEPLOYMENT.md)** for detailed instructions.
+
+Quick EC2 deployment:
+```bash
+# On your EC2 instance
+git clone https://github.com/rosvend/berlin-transportation-app.git
+cd berlin-transportation-app
+./deploy-ec2.sh
+```
