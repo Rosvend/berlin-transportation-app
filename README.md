@@ -1,7 +1,9 @@
 # Real-Time Public Transport Data Pipeline - Berlin Transport App
 ---
 ## Purpose
+
 The purpose of this project is to build a modern, production-grade real-time data pipeline that extracts, stores, transforms, and visualizes live public transport data from Berlin's BVG system using the v6.bvg.transport.rest API. The pipeline is designed to be modular, cloud-portable (AWS-ready), and suitable for a data engineering portfolio.
+
 ---
 ## Scope
 This project covers the end-to-end lifecycle of a real-time data pipeline:
@@ -105,17 +107,9 @@ berlin-transportation-app/
 │   └── workflows/
 │       └── ci.yml # 4 jobs: lint & test
 ├── docs/ # Documentation
-│   ├── API_REVIEW_REPORT.md
-│   ├── DEPLOYMENT_OPTIONS.md
-│   ├── FRONTEND_VALIDATION.md
-│   ├── GITHUB_ISSUES_PLAN.md
-│   ├── PROGRESS_SUMMARY.md
-│   └── PROJECT_UPDATE.md
 ├── docker-compose.yml # Docker orchestration
-├── FEATURES.md # Feature documentation
-├── PRD.md # Product requirements
 ├── TASK_PLAN.md # Task planning
-└── README.md # This file 
+└── README.md 
 ```
 
 ## How to Run
@@ -127,7 +121,7 @@ berlin-transportation-app/
 ```bash
 git clone https://github.com/Rosvend/berlin-transportation-app.git
 cd berlin-transportation-app
-git checkout pr-15-frontend
+git checkout main
 ```
 ### 2. Install Backend Dependencies
 ```text
